@@ -1,0 +1,114 @@
+{
+  "name": "@jacobdelcroix/sportsboard",
+  "version": "1.0.0",
+  "description": "Modular sports tactic board viewer and visual editor built with TypeScript and Konva.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JacobDelcroix/sportsboard.git"
+  },
+  "homepage": "https://github.com/JacobDelcroix/sportsboard#readme",
+  "bugs": {
+    "url": "https://github.com/JacobDelcroix/sportsboard/issues"
+  },
+  "keywords": ["sports", "coaching", "tactics", "board", "editor", "viewer", "konva"],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.9.8",
+  "type": "module",
+  "sideEffects": [
+    "./dist/element/index.js",
+    "./dist/element/editor-entry.js",
+    "./dist/element/viewer-entry.js"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./viewer": {
+      "types": "./dist/viewer/index.d.ts",
+      "import": "./dist/viewer/index.js"
+    },
+    "./editor": {
+      "types": "./dist/editor/index.d.ts",
+      "import": "./dist/editor/index.js"
+    },
+    "./element": {
+      "types": "./dist/element/index.d.ts",
+      "import": "./dist/element/index.js"
+    },
+    "./editor/element": {
+      "types": "./dist/element/editor-entry.d.ts",
+      "import": "./dist/element/editor-entry.js"
+    },
+    "./viewer/element": {
+      "types": "./dist/element/viewer-entry.d.ts",
+      "import": "./dist/element/viewer-entry.js"
+    },
+    "./basketball": {
+      "types": "./dist/sports/basketball/index.d.ts",
+      "import": "./dist/sports/basketball/index.js"
+    },
+    "./basketball/viewer": {
+      "types": "./dist/sports/basketball/viewer-entry.d.ts",
+      "import": "./dist/sports/basketball/viewer-entry.js"
+    },
+    "./basketball/editor": {
+      "types": "./dist/sports/basketball/editor-entry.d.ts",
+      "import": "./dist/sports/basketball/editor-entry.js"
+    },
+    "./football": {
+      "types": "./dist/sports/football/index.d.ts",
+      "import": "./dist/sports/football/index.js"
+    },
+    "./football/viewer": {
+      "types": "./dist/sports/football/viewer-entry.d.ts",
+      "import": "./dist/sports/football/viewer-entry.js"
+    },
+    "./football/editor": {
+      "types": "./dist/sports/football/editor-entry.d.ts",
+      "import": "./dist/sports/football/editor-entry.js"
+    },
+    "./viewer/locales/en.json": "./dist/viewer/locales/en.json",
+    "./viewer/locales/fr.json": "./dist/viewer/locales/fr.json",
+    "./editor/locales/en.json": "./dist/editor/locales/en.json",
+    "./editor/locales/fr.json": "./dist/editor/locales/fr.json",
+    "./basketball/locales/en.json": "./dist/sports/basketball/locales/en.json",
+    "./basketball/locales/fr.json": "./dist/sports/basketball/locales/fr.json",
+    "./football/locales/en.json": "./dist/sports/football/locales/en.json",
+    "./football/locales/fr.json": "./dist/sports/football/locales/fr.json"
+  },
+  "files": ["dist", "docs", "README.md", "CONTRIBUTING.md", "LICENSE"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "verify:package": "node scripts/verify-package.mjs",
+    "playground:build": "vite build --config examples/vanilla/vite.config.ts",
+    "check": "npm run typecheck && npm run test && npm run build && npm run verify:package && npm run playground:build",
+    "dev": "vite --config examples/vanilla/vite.config.ts",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "konva": "^10.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
+  }
+}

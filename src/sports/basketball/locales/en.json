@@ -1,0 +1,12 @@
+{
+  "sport": "Basketball", "halfCourt": "Half court", "fullCourt": "Full court",
+  "attackers": "Attackers", "defenders": "Defenders", "equipment": "Equipment", "movements": "Movements",
+  "attackerDescription": "Attacker number {number}", "defenderDescription": "Defender number {number}",
+  "ball": "Ball", "ballDescription": "Basketball", "cone": "Cone", "coneDescription": "Training cone",
+  "ladder": "Ladder", "ladderDescription": "Agility ladder", "coach": "Coach", "coachDescription": "Coach identified by a C",
+  "trainingHoop": "Hoop", "trainingHoopDescription": "Free-standing training hoop",
+  "basket": "Basket", "basketDescription": "Additional basketball basket",
+  "run": "Run", "runDescription": "Free or element-attached run", "dribble": "Dribble", "dribbleDescription": "Free or element-attached dribble",
+  "pass": "Pass", "passDescription": "Free or element-attached pass", "shot": "Shot", "shotDescription": "Free or element-attached shot",
+  "screen": "Screen", "screenDescription": "Free or element-attached screen"
+}

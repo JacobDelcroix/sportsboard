@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>Playground · SportsBoard</title>
+</head>
+<body>
+  <header class="demo-header">
+    <a class="demo-brand" href="/" aria-label="SportsBoard home"><span>SB</span><strong>SportsBoard</strong><small>Playground</small></a>
+    <span class="demo-badge">Local</span>
+  </header>
+
+  <main class="demo-page">
+    <section class="demo-intro">
+      <div><span class="demo-kicker">Integration area</span><h1>Tactical board editor</h1><p>This page demonstrates a typical SportsBoard integration inside an application.</p></div>
+      <div class="demo-controls">
+        <label><span>Language</span><select id="demo-language"><option value="en">English</option><option value="fr">Français</option></select></label>
+        <label><span>Sport</span><select id="demo-sport"></select></label>
+        <div><span>Display</span><div class="demo-segmented" aria-label="Display mode"><button id="mode-editor" type="button">Editor</button><button id="mode-viewer" type="button">Viewer</button></div></div>
+      </div>
+    </section>
+
+    <section class="demo-integration" aria-label="SportsBoard integration">
+      <sports-board-editor id="app" sport="basketball" locale="en" class="demo-board"></sports-board-editor>
+    </section>
+
+    <section class="demo-lab" aria-labelledby="lab-title">
+      <header class="demo-lab__header">
+        <div><span class="demo-kicker">Playground tools</span><h2 id="lab-title">JSON and image generation</h2></div>
+        <p>Inspect the current document, load JSON, and generate a thumbnail that can be stored with a drill.</p>
+      </header>
+
+      <div class="demo-lab__grid">
+        <article class="demo-panel demo-panel--json">
+          <header class="demo-panel__header">
+            <div><h3>JSON document</h3><p>Updated live while editing.</p></div>
+            <span id="json-status" class="demo-status" data-tone="success">Synchronized</span>
+          </header>
+          <label class="sr-only" for="demo-json">Document SportsBoard JSON</label>
+          <textarea id="demo-json" spellcheck="false" aria-describedby="json-feedback"></textarea>
+          <div class="demo-panel__actions">
+            <button id="load-json" class="demo-button demo-button--primary" type="button">Load this JSON</button>
+            <button id="import-json" class="demo-button" type="button">Import file</button>
+            <button id="copy-json" class="demo-button" type="button">Copy</button>
+            <input id="json-file" type="file" accept="application/json,.json" hidden>
+          </div>
+          <p id="json-feedback" class="demo-feedback" aria-live="polite"></p>
+        </article>
+
+        <article class="demo-panel demo-panel--preview">
+          <header class="demo-panel__header">
+            <div><h3>Image preview</h3><p>Rendered offscreen from the current JSON.</p></div>
+            <span id="image-status" class="demo-status">Not generated</span>
+          </header>
+          <div id="image-preview" class="demo-preview">
+            <div class="demo-preview__empty"><strong>No preview</strong><span>Choose a format, then generate an image.</span></div>
+            <img id="preview-image" alt="Generated tactical board preview" hidden>
+          </div>
+          <div class="demo-image-controls">
+            <label><span>Width</span><select id="image-width"><option value="320">320 px</option><option value="640" selected>640 px</option><option value="1024">1024 px</option></select></label>
+            <label><span>Format</span><select id="image-format"><option value="image/webp" selected>WebP</option><option value="image/png">PNG</option></select></label>
+          </div>
+          <div class="demo-panel__actions">
+            <button id="generate-image" class="demo-button demo-button--primary" type="button">Generate preview</button>
+            <a id="download-image" class="demo-button" hidden>Download</a>
+          </div>
+          <p id="image-feedback" class="demo-feedback" aria-live="polite"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

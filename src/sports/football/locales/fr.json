@@ -1,0 +1,19 @@
+{
+  "sport": "Football",
+  "halfPitch": "Demi-terrain",
+  "fullPitch": "Terrain complet",
+  "players": "Joueurs",
+  "equipment": "Matériel",
+  "movements": "Mouvements",
+  "playerDescription": "Joueur numéro {number}",
+  "ball": "Ballon",
+  "ballDescription": "Ballon de football",
+  "run": "Course",
+  "runDescription": "Course libre ou attachée à un joueur",
+  "dribble": "Dribble",
+  "dribbleDescription": "Dribble libre ou attaché à un joueur",
+  "pass": "Passe",
+  "passDescription": "Passe libre ou attachée à un joueur",
+  "shot": "Tir",
+  "shotDescription": "Tir libre ou attaché à un joueur"
+}

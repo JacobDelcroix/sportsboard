@@ -1,0 +1,7 @@
+{
+  "boardLabel": "Schéma tactique",
+  "navigationLabel": "Navigation du terrain",
+  "zoomOut": "Réduire le zoom",
+  "zoomIn": "Agrandir le terrain",
+  "resetViewport": "Revenir à 100 % et recentrer le terrain"
+}

@@ -1,0 +1,19 @@
+{
+  "sport": "Football",
+  "halfPitch": "Half pitch",
+  "fullPitch": "Full pitch",
+  "players": "Players",
+  "equipment": "Equipment",
+  "movements": "Movements",
+  "playerDescription": "Player number {number}",
+  "ball": "Ball",
+  "ballDescription": "Football",
+  "run": "Run",
+  "runDescription": "Free or player-attached run",
+  "dribble": "Dribble",
+  "dribbleDescription": "Free or player-attached dribble",
+  "pass": "Pass",
+  "passDescription": "Free or player-attached pass",
+  "shot": "Shot",
+  "shotDescription": "Free or player-attached shot"
+}

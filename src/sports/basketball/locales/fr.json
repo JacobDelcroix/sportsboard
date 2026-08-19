@@ -1,0 +1,12 @@
+{
+  "sport": "Basketball", "halfCourt": "Demi-terrain", "fullCourt": "Terrain complet",
+  "attackers": "Attaquants", "defenders": "Défenseurs", "equipment": "Matériel", "movements": "Mouvements",
+  "attackerDescription": "Attaquant numéro {number}", "defenderDescription": "Défenseur numéro {number}",
+  "ball": "Ballon", "ballDescription": "Ballon de basketball", "cone": "Plot", "coneDescription": "Plot d’entraînement",
+  "ladder": "Échelle", "ladderDescription": "Échelle de rythme", "coach": "Coach", "coachDescription": "Coach identifié par un C",
+  "trainingHoop": "Cerceau", "trainingHoopDescription": "Cerceau d’entraînement libre",
+  "basket": "Panier", "basketDescription": "Panier de basketball supplémentaire",
+  "run": "Course", "runDescription": "Course libre ou attachée à des éléments", "dribble": "Dribble", "dribbleDescription": "Dribble libre ou attaché à des éléments",
+  "pass": "Passe", "passDescription": "Passe libre ou attachée à des éléments", "shot": "Tir", "shotDescription": "Tir libre ou attaché à des éléments",
+  "screen": "Écran", "screenDescription": "Écran libre ou attaché à des éléments"
+}
