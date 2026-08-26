@@ -59,6 +59,13 @@ export interface EditorMessages extends ViewerMessages {
   properties: string;
   number: string;
   color: string;
+  textValue: string;
+  movementLabel: string;
+  movementLabelPlaceholder: string;
+  movementType: string;
+  movementRun: string;
+  movementDribble: string;
+  movementPass: string;
   route: string;
   addWaypoint: string;
   routeHint: string;
@@ -68,6 +75,14 @@ export interface EditorMessages extends ViewerMessages {
   palette: string;
   documentColors: string;
   colorOption: string;
+  annotations: string;
+  genericEquipment: string;
+  zone: string;
+  freeText: string;
+  textDefault: string;
+  freeMarker: string;
+  hurdle: string;
+  pole: string;
   surfaceActivated: string;
   dropElement: string;
   elementAdded: string;
@@ -75,6 +90,8 @@ export interface EditorMessages extends ViewerMessages {
   connectorAddedAtCenter: string;
   waypointsAdded: string;
   numberUpdated: string;
+  textUpdated: string;
+  movementUpdated: string;
   selectionRequired: string;
   elementDeleted: string;
   actionUndone: string;

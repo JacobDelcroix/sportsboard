@@ -91,3 +91,14 @@ Run `npm run check` and test both sports before opening the pull request. If a t
 5. Open a pull request against the repository's default branch.
 
 The pull request should explain the user-facing problem, the chosen solution, and how it was tested. Screenshots are welcome for visual changes.
+
+## Maintainer release checklist
+
+1. Confirm the worktree contains only the intended release changes.
+2. Update `version` in `package.json` with `npm version --no-git-tag-version <patch|minor|major>` and update `CHANGELOG.md`.
+3. Run `npm ci` followed by `npm run release:check`.
+4. Commit and push the release branch, then wait for GitHub Actions to pass.
+5. Publish the public scoped package with `npm publish --access public`.
+6. Create and push the matching Git tag, then create a GitHub release from the changelog.
+
+Never publish from an unreviewed or dirty worktree. npm authentication, two-factor authentication, and package provenance should be configured on the maintainer account before the first release.

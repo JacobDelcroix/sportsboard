@@ -11,7 +11,15 @@
   "bugs": {
     "url": "https://github.com/JacobDelcroix/sportsboard/issues"
   },
-  "keywords": ["sports", "coaching", "tactics", "board", "editor", "viewer", "konva"],
+  "keywords": [
+    "sports",
+    "coaching",
+    "tactics",
+    "board",
+    "editor",
+    "viewer",
+    "konva"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -86,7 +94,15 @@
     "./football/locales/en.json": "./dist/sports/football/locales/en.json",
     "./football/locales/fr.json": "./dist/sports/football/locales/fr.json"
   },
-  "files": ["dist", "docs", "README.md", "CONTRIBUTING.md", "LICENSE"],
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -98,7 +114,9 @@
     "verify:package": "node scripts/verify-package.mjs",
     "playground:build": "vite build --config examples/vanilla/vite.config.ts",
     "check": "npm run typecheck && npm run test && npm run build && npm run verify:package && npm run playground:build",
+    "release:check": "npm run check && npm pack --dry-run",
     "dev": "vite --config examples/vanilla/vite.config.ts",
+    "prepublishOnly": "npm run check",
     "prepack": "npm run build"
   },
   "dependencies": {
@@ -108,7 +126,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.2.1",
-    "vitest": "^4.1.10"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }

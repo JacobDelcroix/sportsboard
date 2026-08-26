@@ -36,7 +36,7 @@ Focused imports and imperative integrations are covered in [Alternative integrat
 | `locale` | `en`, `fr` | Selects built-in interface and sport wording |
 | `surface` | surface ID | Selects the empty document's initial surface |
 | `show-save` | boolean attribute | Shows or hides the built-in Save button |
-| `data` | JSON string | Supplies a document when an attribute is appropriate |
+| `data` | JSON string | Supplies a document when an attribute is appropriate; removing it remounts the default/fallback document |
 | `options` | JSON object | Supplies serializable options from markup |
 | `name` | string | Submits current JSON as a native form field |
 
@@ -232,6 +232,31 @@ Coordinates range from `0` to `1`. Movement endpoints are either free points or 
 type Endpoint = { x: number; y: number } | { element: string };
 ```
 
+Built-in generic elements use these public type IDs:
+
+| Tool | Element type |
+| --- | --- |
+| Transparent colored zone | `core.zone` |
+| Multiline free text | `core.text` |
+| Free number or letter | `core.marker` |
+| Hurdle | `core.hurdle` |
+| Pole | `core.pole` |
+
+Text and marker values live in `element.data.text`. Free text accepts line breaks and up to 500 characters in the built-in editor. Colored zones are the only built-in elements with resize handles; their normalized `width` and `height` are stored in the document. A movement's optional label lives in `element.data.label`:
+
+```js
+{
+  id: 'run-1',
+  type: 'core.connector',
+  from: { element: 'player-1' },
+  to: { x: 0.75, y: 0.25 },
+  style: { color: '#2563eb', line: 'solid' },
+  data: { movement: 'run', label: 'Backdoor cut' }
+}
+```
+
+The editor converts `run`, `dribble`, and `pass` by updating `data.movement` and `style.line`; route geometry and attachments are preserved.
+
 Documents are validated against the active sport registry before loading. Unknown surfaces or elements, duplicate IDs, invalid coordinates, broken references, invalid attachments, and attachment cycles are rejected atomically.
 
 ## Lower-level board
@@ -240,7 +265,7 @@ Documents are validated against the active sport registry before loading. Unknow
 import { SportsBoard } from '@jacobdelcroix/sportsboard/core';
 ```
 
-`SportsBoard` is intended for custom interfaces and sport extensions. It exposes mutations (`add`, `update`, `remove`, `clear`), history (`undo`, `redo`), selection, surface changes, waypoint editing, permissions, zoom, pan, serialization, and image export.
+`SportsBoard` is intended for custom interfaces and sport extensions. It exposes mutations (`add`, `update`, `remove`, `clear`), history (`undo`, `redo`), selection, surface changes, waypoint editing, permissions, zoom, pan, serialization, and image export. Pass `{ recordHistory: false }` as the third argument to `update()` when coalescing several live property inputs into one undo step.
 
 ## Localization catalogs
 

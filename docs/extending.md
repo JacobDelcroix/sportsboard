@@ -53,22 +53,29 @@ Use native Konva shapes and groups. There is no SVG requirement. This keeps hit 
 Useful definition options:
 
 - `defaults`: initial dimensions, style, and data;
-- `layer: 'connectors'`: render after content as a movement;
+- `layer: 'background'`: render directly above the sport surface, suitable for colored zones;
+- `layer: 'annotations'`: render above background items and below movements and regular elements, suitable for free text;
+- `layer: 'connectors'`: render movements above background and annotation items and below regular content;
 - `transformable: false`: exclude from rotation controls;
+- `resize`: enable bounded resize handles for this element only;
 - `connectable: false`: prevent editor endpoint snapping;
 - `connectionBoundary`: control the shape and margin used by attached routes;
 - `magnet`: allow an object to attach to selected element types.
 
+Movement definitions should also use `connectable: false`. This prevents imported JSON from attaching one movement endpoint to another movement.
+
 ## Add a movement
 
-Movement elements use `from`, `to`, and optional `waypoints`. Register a connector renderer or reuse a built-in type such as `sportsboard.run`.
+Movement elements use `from`, `to`, optional `waypoints`, and the built-in `core.connector` renderer. `data.movement` identifies the movement and `data.label` can provide a short visible label.
 
 ```ts
 const movement = {
-  type: 'sportsboard.run',
+  type: 'core.connector',
   from: { element: 'player-1' },
   to: { x: 0.7, y: 0.25 },
-  waypoints: [{ x: 0.55, y: 0.5 }]
+  waypoints: [{ x: 0.55, y: 0.5 }],
+  style: { color: '#2563eb', line: 'solid' },
+  data: { movement: 'run', label: 'Curl cut' }
 };
 ```
 

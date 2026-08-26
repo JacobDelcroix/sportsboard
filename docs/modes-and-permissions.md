@@ -36,8 +36,10 @@ Zoom and pan remain available in viewer mode when `interactive` is enabled becau
 
 ## Editor interaction model
 
-The full editor provides its own keyboard and touch interaction layer. Copy, cut, paste, delete, undo, and redo apply to the current selection. Keyboard commands are ignored while the user is typing in the number field or notes. Pasted elements receive a small offset and a new ID; attached items and connector endpoints are pasted as independent, movable geometry.
+The full editor provides its own keyboard and touch interaction layer. Copy, cut, paste, delete, undo, and redo apply to the current selection. Keyboard commands are ignored while the user is typing in the number, text, movement label, movement type, or notes fields. Pasted elements receive a small offset and a new ID; attached items and connector endpoints are pasted as independent, movable geometry.
 
 Board notes are edited in a dedicated drawer and synchronized with `document.meta.notes` on every input. The drawer fills the editor on compact layouts, while element-specific fields remain in the Inspector panel.
+
+Note-only changes are marked as metadata updates internally. The editor still emits its normal `change` event, but it does not rebuild the board color palette when no element color changed.
 
 At compact container widths, the editor exposes separate Tools, Board, and Inspector panels. This layout is controlled by the editor container width and requires no application-side media query.

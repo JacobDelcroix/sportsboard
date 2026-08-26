@@ -42,6 +42,8 @@ editor.value = nextDiagramJson;
 console.log(editor.value);
 ```
 
+Removing the `data` attribute or assigning `undefined` to the `data` property remounts the element with its option fallback or the sport's default empty document.
+
 ## Embed JSON as a child script
 
 This form can be useful when a server template produces a large JSON document and an HTML attribute would be inconvenient:

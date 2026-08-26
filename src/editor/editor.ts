@@ -1,7 +1,9 @@
-import { type SportsBoard, type BoardDocument, type BoardElement, type BoardImageOptions, type Endpoint, type Point, validateBoardDocument } from '../core/index.js';
+import { CoreElements, type SportsBoard, type BoardChangeDetail, type BoardDocument, type BoardElement, type BoardImageOptions, type Endpoint, type Point, validateBoardDocument } from '../core/index.js';
 import { defineSportsBoardViewerElement, SportsBoardViewerElement } from '../element/viewer-element.js';
 import { SportsBoardCanvas } from '../viewer/index.js';
 import { createClipboardElement } from './clipboard.js';
+import { shouldRefreshColorPalette } from './change.js';
+import { createCoreEditorTools, movementConversionPatch, type ConvertibleMovement } from './generic-tools.js';
 import { resolveEditorMessages } from './i18n.js';
 import { mountEditorStyles } from './styles.js';
 import type { EditorConnectorTool, EditorElementTool, EditorMessages, EditorSaveDetail, EditorSportDefinition, SportsBoardEditorOptions } from './types.js';
@@ -62,6 +64,7 @@ export class SportsBoardEditor extends EventTarget {
   private selectedColor = '#2563eb';
   private messages: EditorMessages;
   private notesHistoryOpen = false;
+  private propertyHistoryOpen = false;
   private clipboard?: { element: BoardElement; document: BoardDocument };
   private pasteCount = 0;
   private toastTimer?: ReturnType<typeof setTimeout>;
@@ -115,6 +118,7 @@ export class SportsBoardEditor extends EventTarget {
     this.selectedId = null;
     this.draggedElement = null;
     this.notesHistoryOpen = false;
+    this.propertyHistoryOpen = false;
     if (this.toastTimer) clearTimeout(this.toastTimer);
     mountEditorStyles();
     this.root = document.createElement('div');
@@ -150,6 +154,11 @@ export class SportsBoardEditor extends EventTarget {
           <section class="sb-editor__section"><h2 class="sb-editor__section-title" data-label="properties"></h2>
             <fieldset class="sb-editor__fields" disabled>
               <label class="sb-editor__field" data-field="number"><span></span><input type="number" min="0" max="99" step="1"></label>
+              <label class="sb-editor__field" data-field="text"><span></span><textarea maxlength="500" rows="5"></textarea></label>
+              <label class="sb-editor__field" data-field="movement-label"><span></span><input type="text" maxlength="60"></label>
+              <label class="sb-editor__field" data-field="movement-type"><span></span><select>
+                <option value="run"></option><option value="dribble"></option><option value="pass"></option>
+              </select></label>
               <div class="sb-editor__field" data-field="color"><span></span><div class="sb-editor__color-picker"></div></div>
             </fieldset>
           </section>
@@ -228,8 +237,9 @@ export class SportsBoardEditor extends EventTarget {
       this.dispatchEvent(new CustomEvent('viewportchange', { detail: (event as CustomEvent).detail }));
     });
     this.board = this.canvas.getBoard();
-    this.board.addEventListener('change', () => {
-      this.renderColorPicker();
+    this.board.addEventListener('change', event => {
+      const detail = (event as CustomEvent<BoardChangeDetail>).detail;
+      if (shouldRefreshColorPalette(detail)) this.renderColorPicker();
       this.dispatchEvent(new CustomEvent('change', { detail: { document: this.board.getDocument() } }));
     });
     this.board.addEventListener('selectionchange', event => this.handleSelection((event as CustomEvent<{ selectedIds: string[] }>).detail.selectedIds[0] ?? null));
@@ -257,7 +267,12 @@ export class SportsBoardEditor extends EventTarget {
   private renderToolbox(): void {
     const toolbox = this.query<HTMLElement>('.sb-editor__toolbox');
     toolbox.replaceChildren();
-    for (const group of this.sport.groups) {
+    const equipmentGroup = this.sport.groups.find(group => group.id === 'equipment' || group.id === 'objects')?.id;
+    const generic = createCoreEditorTools(this.messages, equipmentGroup);
+    const groups = [...this.sport.groups, ...generic.groups];
+    const elements = [...this.sport.elements, ...generic.elements];
+    const connectors = [...this.sport.connectors, ...generic.connectors];
+    for (const group of groups) {
       const section = document.createElement('section');
       section.className = 'sb-editor__group';
       section.dataset.group = group.id;
@@ -266,8 +281,8 @@ export class SportsBoardEditor extends EventTarget {
       title.textContent = group.label;
       const tools = document.createElement('div');
       tools.className = group.layout === 'list' ? 'sb-editor__tool-list' : 'sb-editor__tool-grid';
-      for (const tool of this.sport.elements.filter(item => item.group === group.id)) tools.append(this.createToolButton(tool));
-      for (const tool of this.sport.connectors.filter(item => item.group === group.id)) tools.append(this.createToolButton(tool));
+      for (const tool of elements.filter(item => item.group === group.id)) tools.append(this.createToolButton(tool));
+      for (const tool of connectors.filter(item => item.group === group.id)) tools.append(this.createToolButton(tool));
       section.append(title, tools);
       toolbox.append(section);
     }
@@ -343,6 +358,18 @@ export class SportsBoardEditor extends EventTarget {
     });
     this.root.addEventListener('keydown', event => this.handleShortcut(event), { capture: true });
     this.query<HTMLElement>('[data-field="number"]').querySelector('input')!.addEventListener('input', event => this.updateNumber(event));
+    const text = this.query<HTMLTextAreaElement>('[data-field="text"] textarea');
+    text.addEventListener('input', event => this.updateText(event));
+    text.addEventListener('blur', () => this.finishPropertyInput(this.messages.textUpdated));
+    const movementLabel = this.query<HTMLInputElement>('[data-field="movement-label"] input');
+    movementLabel.addEventListener('input', event => this.updateMovementLabel(event));
+    movementLabel.addEventListener('blur', () => this.finishPropertyInput(this.messages.movementUpdated));
+    this.query<HTMLSelectElement>('[data-field="movement-type"] select').addEventListener('change', event => {
+      // The editor's public `change` event carries a document. Do not let the
+      // native select event escape the light-DOM component with the same name.
+      event.stopPropagation();
+      this.updateMovementType(event);
+    });
     const notes = this.query<HTMLTextAreaElement>('.sb-editor__notes');
     notes.addEventListener('input', () => this.flushNotes());
     notes.addEventListener('blur', () => { this.notesHistoryOpen = false; });
@@ -408,6 +435,7 @@ export class SportsBoardEditor extends EventTarget {
   }
 
   private handleSelection(targetId: string | null): void {
+    this.propertyHistoryOpen = false;
     this.selectedId = targetId;
     this.updateSelection();
   }
@@ -420,6 +448,9 @@ export class SportsBoardEditor extends EventTarget {
       this.root.dataset.hasSelection = 'false';
       fields.disabled = true;
       this.query<HTMLElement>('[data-section="route"]').hidden = true;
+      this.query<HTMLElement>('[data-field="text"]').hidden = true;
+      this.query<HTMLElement>('[data-field="movement-label"]').hidden = true;
+      this.query<HTMLElement>('[data-field="movement-type"]').hidden = true;
       this.renderColorPicker();
       return;
     }
@@ -429,6 +460,22 @@ export class SportsBoardEditor extends EventTarget {
     const numberField = this.query<HTMLElement>('[data-field="number"]');
     numberField.hidden = element.data?.number === undefined;
     numberField.querySelector('input')!.value = element.data?.number === undefined ? '' : String(element.data.number);
+    const textField = this.query<HTMLElement>('[data-field="text"]');
+    const textEditable = element.type === CoreElements.text || element.type === CoreElements.marker;
+    textField.hidden = !textEditable;
+    const textInput = textField.querySelector<HTMLTextAreaElement>('textarea')!;
+    const marker = element.type === CoreElements.marker;
+    textField.classList.toggle('is-marker', marker);
+    textInput.maxLength = marker ? 3 : 500;
+    textInput.rows = marker ? 1 : 5;
+    textInput.value = textEditable ? String(element.data?.text ?? '') : '';
+    const movement = typeof element.data?.movement === 'string' ? element.data.movement : '';
+    const movementLabelField = this.query<HTMLElement>('[data-field="movement-label"]');
+    movementLabelField.hidden = element.type !== CoreElements.connector;
+    movementLabelField.querySelector<HTMLInputElement>('input')!.value = element.type === CoreElements.connector ? String(element.data?.label ?? '') : '';
+    const movementTypeField = this.query<HTMLElement>('[data-field="movement-type"]');
+    movementTypeField.hidden = !['run', 'dribble', 'pass'].includes(movement);
+    if (!movementTypeField.hidden) movementTypeField.querySelector<HTMLSelectElement>('select')!.value = movement;
     const elementColor = String(element.style?.color ?? this.defaultColor(element));
     this.selectedColor = isColor(elementColor) ? elementColor : this.defaultColor(element);
     this.renderColorPicker();
@@ -455,7 +502,7 @@ export class SportsBoardEditor extends EventTarget {
 
   private updateNumber(event: Event): void {
     if (!this.selectedId) return;
-    const input = event.currentTarget as HTMLInputElement;
+    const input = event.currentTarget as HTMLTextAreaElement;
     if (input.value === '' || !input.validity.valid) return;
     const element = this.board.getDocument().elements.find(item => item.id === this.selectedId);
     if (!element || element.data?.number === undefined) return;
@@ -463,6 +510,48 @@ export class SportsBoardEditor extends EventTarget {
       this.board.update(this.selectedId, { data: { ...element.data, number: Number(input.value) } });
       this.updateSelection();
       this.setStatus(this.messages.numberUpdated, 'success');
+    } catch (error) { this.setStatus((error as Error).message, 'error'); }
+  }
+
+  private updateText(event: Event): void {
+    if (!this.selectedId) return;
+    const input = event.currentTarget as HTMLInputElement;
+    const element = this.board.getDocument().elements.find(item => item.id === this.selectedId);
+    if (!element || (element.type !== CoreElements.text && element.type !== CoreElements.marker)) return;
+    try {
+      const value = element.type === CoreElements.marker ? input.value.replace(/\s+/g, '').slice(0, 3) : input.value;
+      if (input.value !== value) input.value = value;
+      this.board.update(this.selectedId, { data: { ...element.data, text: value } }, { recordHistory: !this.propertyHistoryOpen });
+      this.propertyHistoryOpen = true;
+    } catch (error) { this.setStatus((error as Error).message, 'error'); }
+  }
+
+  private updateMovementLabel(event: Event): void {
+    if (!this.selectedId) return;
+    const input = event.currentTarget as HTMLInputElement;
+    const element = this.board.getDocument().elements.find(item => item.id === this.selectedId);
+    if (!element || element.type !== CoreElements.connector) return;
+    try {
+      this.board.update(this.selectedId, { data: { ...element.data, label: input.value } }, { recordHistory: !this.propertyHistoryOpen });
+      this.propertyHistoryOpen = true;
+    } catch (error) { this.setStatus((error as Error).message, 'error'); }
+  }
+
+  private finishPropertyInput(message: string): void {
+    if (this.propertyHistoryOpen) this.setStatus(message, 'success');
+    this.propertyHistoryOpen = false;
+  }
+
+  private updateMovementType(event: Event): void {
+    if (!this.selectedId) return;
+    const movement = (event.currentTarget as HTMLSelectElement).value as ConvertibleMovement;
+    if (!['run', 'dribble', 'pass'].includes(movement)) return;
+    const element = this.board.getDocument().elements.find(item => item.id === this.selectedId);
+    if (!element || element.type !== CoreElements.connector) return;
+    try {
+      this.board.update(this.selectedId, movementConversionPatch(element, movement));
+      this.updateSelection();
+      this.setStatus(this.messages.movementUpdated, 'success');
     } catch (error) { this.setStatus((error as Error).message, 'error'); }
   }
 
@@ -713,6 +802,15 @@ export class SportsBoardEditor extends EventTarget {
     this.query<HTMLElement>('[data-label="properties"]').textContent = this.messages.properties;
     this.query<HTMLElement>('[data-label="route"]').textContent = this.messages.route;
     this.query<HTMLElement>('[data-field="number"] span').textContent = this.messages.number;
+    this.query<HTMLElement>('[data-field="text"] span').textContent = this.messages.textValue;
+    this.query<HTMLElement>('[data-field="movement-label"] span').textContent = this.messages.movementLabel;
+    this.query<HTMLInputElement>('[data-field="movement-label"] input').placeholder = this.messages.movementLabelPlaceholder;
+    this.query<HTMLElement>('[data-field="movement-type"] span').textContent = this.messages.movementType;
+    for (const [value, label] of [
+      ['run', this.messages.movementRun],
+      ['dribble', this.messages.movementDribble],
+      ['pass', this.messages.movementPass]
+    ] as const) this.query<HTMLOptionElement>(`[data-field="movement-type"] option[value="${value}"]`).textContent = label;
     this.query<HTMLElement>('[data-field="color"] > span').textContent = this.messages.color;
     this.query<HTMLButtonElement>('[data-action="add-waypoint"]').textContent = `＋ ${this.messages.addWaypoint}`;
     this.query<HTMLElement>('.sb-editor__hint').textContent = this.messages.routeHint;

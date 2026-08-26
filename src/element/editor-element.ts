@@ -58,8 +58,11 @@ export class SportsBoardEditorElement extends HTMLElementBase {
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue || !this.isConnected) return;
     if (name === 'data') {
-      this.documentData = newValue ? parseJSON<BoardDocument>(newValue, 'data attribute') : undefined;
-      if (this.documentData !== undefined && this.instance) this.load(this.documentData);
+      try {
+        this.documentData = newValue ? parseJSON<BoardDocument>(newValue, 'data attribute') : undefined;
+        if (this.documentData !== undefined && this.instance) this.load(this.documentData);
+        else this.scheduleMount();
+      } catch (value) { this.emitError(value); }
       return;
     }
     this.scheduleMount();
@@ -183,14 +186,16 @@ export class SportsBoardEditorElement extends HTMLElementBase {
       this.mountQueued = false;
       if (!this.isConnected) return;
       try { this.mount(); }
-      catch (value) {
-        const error = value instanceof Error ? value : new Error(String(value));
-        emit<SportsBoardElementErrorDetail>(this, 'error', { error });
-      }
+      catch (value) { this.emitError(value); }
     });
   }
 
   private syncFormValue(): void { this.internals?.setFormValue(this.toJSON() ?? ''); }
+
+  private emitError(value: unknown): void {
+    const error = value instanceof Error ? value : new Error(String(value));
+    emit<SportsBoardElementErrorDetail>(this, 'error', { error });
+  }
 }
 
 export function defineSportsBoardEditorElement(tagName = 'sports-board-editor'): void {

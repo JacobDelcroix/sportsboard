@@ -2,6 +2,22 @@
 
 One editor or viewer element owns one sport. Sport selection belongs to the surrounding application: render a new element when the user changes sport.
 
+## Shared editor tools
+
+Every sport automatically receives the generic `core` tools:
+
+- a transparent colored zone;
+- multiline free text;
+- a free letter or number marker;
+- a hurdle;
+- a pole.
+
+These elements use native Konva shapes and do not accept movement attachments. Their stacking order is fixed: colored zones sit directly above the surface, free text sits above colored zones, then movements and regular elements render above both. Players, equipment, and routes therefore retain pointer priority where they overlap, while text can always remain readable over a zone regardless of insertion order. The colored zone is the only resizable built-in element: select it, then drag its edge or corner handles to extend it horizontally and vertically. Select a visible, unobstructed part of a background item to move or edit it. Free text accepts line breaks and up to 500 characters.
+
+Hurdles and poles are inserted into the sport's existing Equipment section instead of creating another toolbox section.
+
+Movements accept an optional label. Run, dribble, and pass can be converted from the Inspector without changing endpoints, element attachments, waypoints, color, or label.
+
 ## Basketball
 
 ```html

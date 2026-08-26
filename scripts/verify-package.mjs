@@ -1,22 +1,34 @@
-const entryPoints = [
-  '@jacobdelcroix/sportsboard/core',
-  '@jacobdelcroix/sportsboard/viewer',
-  '@jacobdelcroix/sportsboard/editor',
-  '@jacobdelcroix/sportsboard/element',
-  '@jacobdelcroix/sportsboard/editor/element',
-  '@jacobdelcroix/sportsboard/viewer/element',
-  '@jacobdelcroix/sportsboard/basketball/viewer',
-  '@jacobdelcroix/sportsboard/basketball/editor',
-  '@jacobdelcroix/sportsboard/football/viewer',
-  '@jacobdelcroix/sportsboard/football/editor'
-];
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 
-for (const entryPoint of entryPoints) {
-  const module = await import(entryPoint);
+const root = new URL('../', import.meta.url);
+const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
+const requiredMetadata = ['name', 'version', 'description', 'license', 'repository', 'homepage', 'bugs', 'exports'];
 
-  if (Object.keys(module).length === 0) {
-    throw new Error(`${entryPoint} does not expose any public API.`);
+for (const key of requiredMetadata) {
+  if (!manifest[key]) throw new Error(`package.json is missing required publication metadata: ${key}`);
+}
+
+for (const file of ['README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'SECURITY.md', 'LICENSE']) {
+  if (!existsSync(new URL(file, root))) throw new Error(`Required package file is missing: ${file}`);
+}
+
+const importable = [];
+for (const [subpath, target] of Object.entries(manifest.exports)) {
+  const targets = typeof target === 'string' ? [target] : Object.values(target);
+  for (const file of targets) {
+    if (typeof file !== 'string' || !file.startsWith('./')) throw new Error(`Invalid export target for ${subpath}`);
+    if (!existsSync(new URL(file.slice(2), root))) throw new Error(`Missing export target for ${subpath}: ${file}`);
+  }
+
+  if (typeof target === 'object' && typeof target.import === 'string') {
+    importable.push(subpath === '.' ? manifest.name : `${manifest.name}${subpath.slice(1)}`);
   }
 }
 
-console.log(`Verified ${entryPoints.length} public package entry points.`);
+for (const entryPoint of importable) {
+  const module = await import(entryPoint);
+  if (Object.keys(module).length === 0) throw new Error(`${entryPoint} does not expose any public API.`);
+}
+
+console.log(`Verified ${importable.length} JavaScript entry points, all export targets, and publication metadata.`);

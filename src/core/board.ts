@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { History } from './history.js';
-import { requestsWheelZoom } from './interactions.js';
+import { constrainTransformerBox, requestsWheelZoom } from './interactions.js';
 import { Registry } from './registry.js';
 import { isElementEndpoint, registerBuiltins } from './builtins.js';
 import { detachElementReferences } from './references.js';
@@ -27,7 +27,8 @@ export class SportsBoard extends EventTarget {
   readonly container: HTMLElement;
   readonly registry: Registry;
   private stage: Konva.Stage;
-  private surfaceLayer = new Konva.Layer({ listening: false });
+  private backgroundLayer = new Konva.Layer();
+  private annotationLayer = new Konva.Layer();
   private connectorLayer = new Konva.Layer();
   private contentLayer = new Konva.Layer();
   private uiLayer = new Konva.Layer();
@@ -77,9 +78,11 @@ export class SportsBoard extends EventTarget {
     this.document = clone(initial);
     this.stage = new Konva.Stage({ container: container as HTMLDivElement, width: options.width ?? (container.clientWidth || 800), height: options.height ?? (container.clientHeight || 600) });
     if (this.interactive) this.stage.container().style.touchAction = 'none';
-    this.stage.add(this.surfaceLayer, this.connectorLayer, this.contentLayer, this.uiLayer);
+    this.stage.add(this.backgroundLayer, this.annotationLayer, this.connectorLayer, this.contentLayer, this.uiLayer);
     this.uiLayer.add(this.connectorHandles, this.transformer);
     if (!this.interactive) {
+      this.backgroundLayer.listening(false);
+      this.annotationLayer.listening(false);
       this.connectorLayer.listening(false);
       this.contentLayer.listening(false);
       this.uiLayer.listening(false);
@@ -149,7 +152,7 @@ export class SportsBoard extends EventTarget {
     catch (error) { this.document = previous; this.resize(); throw error; }
     this.history.clear();
     this.clearSelection();
-    this.emitChange();
+    this.emitChange('content');
   }
   setMeta(meta: BoardDocument['meta'], options: BoardMutationOptions = {}): void {
     this.require('editProperties');
@@ -158,7 +161,7 @@ export class SportsBoard extends EventTarget {
     validateBoardDocument(next, this.registry);
     if (options.recordHistory !== false) this.commit();
     this.document = next;
-    this.emitChange();
+    this.emitChange('meta');
   }
   setSurface(type: string, data?: Record<string, unknown>): void {
     this.require('editProperties');
@@ -168,7 +171,7 @@ export class SportsBoard extends EventTarget {
     this.commit();
     this.document = next;
     this.resize();
-    this.emitChange();
+    this.emitChange('surface');
   }
   add(input: ElementInput): BoardElement {
     this.require('create');
@@ -183,13 +186,13 @@ export class SportsBoard extends EventTarget {
     this.emitChange();
     return clone(element);
   }
-  update(elementId: string, patch: Partial<Omit<BoardElement, 'id' | 'type'>>): BoardElement {
+  update(elementId: string, patch: Partial<Omit<BoardElement, 'id' | 'type'>>, options: BoardMutationOptions = {}): BoardElement {
     this.require('editProperties');
     const index = this.indexOf(elementId);
     const next = clone(this.document);
     next.elements[index] = { ...next.elements[index], ...clone(patch) };
     validateBoardDocument(next, this.registry);
-    this.commit();
+    if (options.recordHistory !== false) this.commit();
     this.document = next;
     this.render();
     this.emitChange();
@@ -275,7 +278,9 @@ export class SportsBoard extends EventTarget {
   private require(permission: keyof BoardPermissions): void { if (!this.permissions[permission]) throw new Error(`Action denied: permission '${permission}' is disabled in ${this.mode} mode`); }
   private indexOf(elementId: string): number { const index = this.document.elements.findIndex(item => item.id === elementId); if (index < 0) throw new Error(`Unknown element: ${elementId}`); return index; }
   private commit(): void { this.history.push(this.document); }
-  private emitChange(): void { this.dispatchEvent(new CustomEvent<BoardChangeDetail>('change', { detail: { document: this.getDocument() } })); }
+  private emitChange(kind: BoardChangeDetail['kind'] = 'content'): void {
+    this.dispatchEvent(new CustomEvent<BoardChangeDetail>('change', { detail: { document: this.getDocument(), kind } }));
+  }
   private bindEvents(): void {
     this.stage.on('wheel', event => {
       const nativeEvent = event.evt as WheelEvent;
@@ -332,10 +337,12 @@ export class SportsBoard extends EventTarget {
     if (this.connectorRenderFrame !== undefined) { cancelAnimationFrame(this.connectorRenderFrame); this.connectorRenderFrame = undefined; }
     this.dirtyConnectorIds = new Set();
     const width = this.stage.width(), height = this.stage.height();
-    this.surfaceLayer.destroyChildren(); this.connectorLayer.destroyChildren(); this.contentLayer.destroyChildren(); this.nodeById.clear(); this.connectionRectById.clear();
+    this.backgroundLayer.destroyChildren(); this.annotationLayer.destroyChildren(); this.connectorLayer.destroyChildren(); this.contentLayer.destroyChildren(); this.nodeById.clear(); this.connectionRectById.clear();
     this.elementById = new Map(this.document.elements.map(element => [element.id, element]));
     const surface = this.registry.getSurface(this.document.surface.type);
-    this.surfaceLayer.add(surface.render(width, height, this.document.surface.data));
+    const renderedSurface = surface.render(width, height, this.document.surface.data);
+    renderedSurface.listening(false);
+    this.backgroundLayer.add(renderedSurface);
     const context = this.renderContext();
     for (const element of this.document.elements) {
       const definition = this.registry.getElement(element.type);
@@ -365,10 +372,32 @@ export class SportsBoard extends EventTarget {
         });
         node.on('transformstart', () => { beforeDrag = clone(this.document); });
         node.on('transform', () => { this.keepLabelsUpright(node); this.scheduleConnectorRender(element.id); });
-        node.on('transformend', () => { if (!this.permissions.rotate) return; if (beforeDrag) this.history.push(beforeDrag); const current = this.document.elements[this.indexOf(element.id)]; current.rotation = node.rotation(); this.render(); this.select(element.id); this.emitChange(); });
+        node.on('transformend', () => {
+          const resize = definition.resize;
+          if (!this.permissions.rotate && (!resize || !this.permissions.editProperties)) return;
+          if (beforeDrag) this.history.push(beforeDrag);
+          const current = this.document.elements[this.indexOf(element.id)];
+          if (this.permissions.rotate) current.rotation = node.rotation();
+          if (resize && this.permissions.editProperties) {
+            const defaultWidth = typeof definition.defaults?.width === 'number' ? definition.defaults.width : .1;
+            const defaultHeight = typeof definition.defaults?.height === 'number' ? definition.defaults.height : .1;
+            const baseWidth = current.width ?? defaultWidth;
+            const baseHeight = current.height ?? defaultHeight;
+            current.width = Math.max(resize.minWidth, Math.min(resize.maxWidth, baseWidth * Math.abs(node.scaleX())));
+            current.height = Math.max(resize.minHeight, Math.min(resize.maxHeight, baseHeight * Math.abs(node.scaleY())));
+            const absolute = this.viewportToBoard(node.absolutePosition());
+            const position = clampPoint({ x: absolute.x / width, y: absolute.y / height });
+            current.x = position.x;
+            current.y = position.y;
+          }
+          this.render(); this.select(element.id); this.emitChange();
+        });
       }
       this.nodeById.set(element.id, node);
-      this.contentLayer.add(renderedNode);
+      const targetLayer = definition.layer === 'background'
+        ? this.backgroundLayer
+        : definition.layer === 'annotations' ? this.annotationLayer : this.contentLayer;
+      targetLayer.add(renderedNode);
       // Capture the element's own geometry before attached elements become
       // children of its Konva group.
       this.connectionRectById.set(element.id, node.getClientRect({ skipTransform: true, skipShadow: true, skipStroke: true }));
@@ -619,8 +648,20 @@ export class SportsBoard extends EventTarget {
     const node = element && this.nodeById.get(element.id);
     const definition = element ? this.registry.getElement(element.type) : undefined;
     const transformable = definition?.transformable !== false;
+    const resize = definition?.resize;
     this.transformer.nodes(node && this.permissions.select && transformable ? [node] : []);
-    this.transformer.resizeEnabled(false);
+    this.transformer.resizeEnabled(Boolean(resize) && this.permissions.editProperties);
+    this.transformer.enabledAnchors(resize ? ['top-left', 'top-center', 'top-right', 'middle-right', 'bottom-right', 'bottom-center', 'bottom-left', 'middle-left'] : []);
+    this.transformer.keepRatio(resize?.keepRatio ?? true);
+    this.transformer.flipEnabled(false);
+    this.transformer.boundBoxFunc((oldBox, nextBox) => constrainTransformerBox(
+      oldBox,
+      nextBox,
+      resize,
+      this.stage.width(),
+      this.stage.height(),
+      this.ui.zoom
+    ));
     this.transformer.rotateEnabled(this.permissions.rotate);
     this.renderConnectorHandles(element);
     this.uiLayer.batchDraw();

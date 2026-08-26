@@ -6,7 +6,7 @@ const registry = (): Registry => new Registry()
   .registerElement('test.player', { render: () => ({}) as never })
   .registerElement('test.ball', { connectable: false, magnet: { targetTypes: ['test.player'] }, render: () => ({}) as never })
   .registerElement('test.attached', { magnet: { targetTypes: ['test.attached'] }, render: () => ({}) as never })
-  .registerElement('core.connector', { layer: 'connectors', render: () => ({}) as never });
+  .registerElement('core.connector', { layer: 'connectors', connectable: false, render: () => ({}) as never });
 
 const validDocument = (): BoardDocument => ({
   schema: 'sportsboard',
@@ -29,7 +29,8 @@ describe('validateBoardDocument', () => {
     ['duplicate IDs', (document: BoardDocument) => { document.elements[1].id = 'player'; }, 'duplicate element id'],
     ['invalid coordinate', (document: BoardDocument) => { document.elements[0].x = 2; }, 'normalized value'],
     ['broken endpoint', (document: BoardDocument) => { document.elements[2].from = { element: 'missing' }; }, 'unknown element'],
-    ['non-connectable endpoint', (document: BoardDocument) => { document.elements[2].from = { element: 'ball' }; }, 'does not accept connectors']
+    ['non-connectable endpoint', (document: BoardDocument) => { document.elements[2].from = { element: 'ball' }; }, 'does not accept connectors'],
+    ['connector endpoint', (document: BoardDocument) => { document.elements[2].to = { element: 'run' }; }, 'does not accept connectors']
   ])('rejects %s', (_name, mutate, message) => {
     const document = validDocument();
     mutate(document);

@@ -17,6 +17,15 @@ const routePoints = (element: BoardElement, context: RenderContext): number[] =>
 
 interface PixelPoint { x: number; y: number }
 
+export const CoreElements = Object.freeze({
+  connector: 'core.connector',
+  zone: 'core.zone',
+  text: 'core.text',
+  marker: 'core.marker',
+  hurdle: 'core.hurdle',
+  pole: 'core.pole'
+});
+
 const pointDistance = (from: PixelPoint, to: PixelPoint): number => Math.hypot(to.x - from.x, to.y - from.y);
 const interpolate = (from: PixelPoint, to: PixelPoint, progress: number): PixelPoint => ({
   x: from.x + (to.x - from.x) * progress,
@@ -160,9 +169,220 @@ const shotShape = (points: number[], color: string, width: number, tension: numb
   return group;
 };
 
+const withMovementLabel = (
+  node: Konva.Shape | Konva.Group,
+  element: BoardElement,
+  centerline: PixelPoint[],
+  color: string
+): Konva.Group => {
+  const group = node instanceof Konva.Group ? node : new Konva.Group();
+  if (group !== node) group.add(node);
+  const value = typeof element.data?.label === 'string' ? element.data.label.trim() : '';
+  if (!value || !centerline.length) return group;
+
+  const point = centerline[Math.floor((centerline.length - 1) / 2)];
+  const text = new Konva.Text({
+    text: value.slice(0, 60),
+    padding: 5,
+    fill: color,
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize: 12,
+    fontStyle: 'bold',
+    listening: false
+  });
+  const bounds = text.getClientRect({ skipTransform: true, skipShadow: true, skipStroke: true });
+  const label = new Konva.Group({
+    x: point.x - bounds.width / 2,
+    y: point.y - bounds.height - 10,
+    listening: false
+  });
+  label.add(new Konva.Rect({
+    width: bounds.width,
+    height: bounds.height,
+    fill: '#ffffff',
+    opacity: .92,
+    cornerRadius: 6,
+    shadowColor: '#0f172a',
+    shadowBlur: 4,
+    shadowOpacity: .16
+  }));
+  label.add(text);
+  group.add(label);
+  return group;
+};
+
+interface ElementBox { group: Konva.Group; width: number; height: number }
+
+const elementBox = (
+  element: BoardElement,
+  context: RenderContext,
+  defaultWidth: number,
+  defaultHeight: number,
+  aspectRatio: number | null = defaultHeight / defaultWidth,
+  hitArea = true
+): ElementBox => {
+  const rawWidth = (element.width ?? defaultWidth) * context.width;
+  const rawHeight = (element.height ?? defaultHeight) * context.height;
+  const width = aspectRatio === null ? rawWidth : Math.sqrt(Math.max(1, rawWidth * rawHeight) / aspectRatio);
+  const height = aspectRatio === null ? rawHeight : width * aspectRatio;
+  const group = new Konva.Group({
+    x: (element.x ?? 0) * context.width,
+    y: (element.y ?? 0) * context.height,
+    width,
+    height,
+    offsetX: width / 2,
+    offsetY: height / 2,
+    rotation: element.rotation ?? 0
+  });
+  if (hitArea) group.add(new Konva.Rect({ width, height, fill: 'rgba(0,0,0,.001)' }));
+  return { group, width, height };
+};
+
+const elementColor = (element: BoardElement, fallback: string): string => String(element.style?.color ?? fallback);
+
+const zone = (element: BoardElement, context: RenderContext): Konva.Group => {
+  const { group, width, height } = elementBox(element, context, .24, .14, null, false);
+  const color = elementColor(element, '#2563eb');
+  group.add(new Konva.Rect({
+    x: width * .02,
+    y: height * .04,
+    width: width * .96,
+    height: height * .92,
+    fill: color,
+    opacity: .18,
+    cornerRadius: Math.min(width, height) * .12,
+    listening: false
+  }));
+  group.add(new Konva.Rect({
+    x: width * .02,
+    y: height * .04,
+    width: width * .96,
+    height: height * .92,
+    stroke: color,
+    strokeWidth: Math.max(2, Math.min(width, height) * .025),
+    hitStrokeWidth: 16,
+    dash: [10, 7],
+    cornerRadius: Math.min(width, height) * .12
+  }));
+  return group;
+};
+
+const freeText = (element: BoardElement, context: RenderContext): Konva.Group => {
+  const value = String(element.data?.text ?? 'Text').slice(0, 500);
+  const width = (element.width ?? .32) * context.width;
+  const baseHeight = (element.height ?? .11) * context.height;
+  const padding = Math.max(9, width * .05);
+  const fontSize = value.length > 320 ? 9 : value.length > 180 ? 10 : Math.max(10.5, Math.min(14, context.width * .018));
+  const text = new Konva.Text({
+    text: value,
+    x: padding,
+    width: width - padding * 2,
+    align: 'center',
+    verticalAlign: 'middle',
+    fill: elementColor(element, '#0f172a'),
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize,
+    fontStyle: 'bold',
+    lineHeight: 1.2,
+    wrap: 'word'
+  });
+  const contentHeight = text.height();
+  // Keep one extra line of breathing room because Konva's wrapped text height
+  // can land on a fractional boundary and otherwise clip the final line.
+  const height = Math.min(context.height * .45, Math.max(baseHeight, contentHeight + padding * 2 + fontSize * 1.2));
+  const group = new Konva.Group({
+    x: (element.x ?? 0) * context.width,
+    y: (element.y ?? 0) * context.height,
+    width,
+    height,
+    offsetX: width / 2,
+    offsetY: height / 2,
+    rotation: element.rotation ?? 0
+  });
+  const color = elementColor(element, '#0f172a');
+  group.add(new Konva.Rect({
+    x: width * .02,
+    y: height * .08,
+    width: width * .96,
+    height: height * .84,
+    fill: '#ffffff',
+    opacity: .88,
+    cornerRadius: Math.min(width, height) * .18,
+    stroke: color,
+    strokeWidth: 1,
+    shadowColor: '#0f172a',
+    shadowBlur: 5,
+    shadowOpacity: .12
+  }));
+  text.y(padding);
+  text.height(height - padding * 2);
+  text.ellipsis(contentHeight > height - padding * 2);
+  group.add(text);
+  return group;
+};
+
+const marker = (element: BoardElement, context: RenderContext): Konva.Group => {
+  const { group, width, height } = elementBox(element, context, .058, .058, 1);
+  const color = elementColor(element, '#7c3aed');
+  const radius = Math.min(width, height) * .4;
+  group.add(new Konva.Circle({
+    x: width / 2,
+    y: height / 2,
+    radius,
+    fill: '#ffffff',
+    stroke: color,
+    strokeWidth: Math.max(3, width * .065),
+    shadowColor: '#0f172a',
+    shadowBlur: 5,
+    shadowOpacity: .2
+  }));
+  group.add(new Konva.Text({
+    text: String(element.data?.text ?? 'A').slice(0, 3),
+    x: width / 2 - radius,
+    y: height / 2 - radius,
+    width: radius * 2,
+    height: radius * 2,
+    align: 'center',
+    verticalAlign: 'middle',
+    fill: color,
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize: radius * .9,
+    fontStyle: 'bold'
+  }));
+  return group;
+};
+
+const hurdle = (element: BoardElement, context: RenderContext): Konva.Group => {
+  const { group, width, height } = elementBox(element, context, .05, .045, .62);
+  const color = elementColor(element, '#f97316');
+  const strokeWidth = Math.max(3, width * .07);
+  const line = (points: number[], stroke = color, widthOverride = strokeWidth): void => {
+    group.add(new Konva.Line({ points, stroke: '#ffffff', strokeWidth: widthOverride + 3, lineCap: 'round', lineJoin: 'round' }));
+    group.add(new Konva.Line({ points, stroke, strokeWidth: widthOverride, lineCap: 'round', lineJoin: 'round' }));
+  };
+  line([width * .18, height * .82, width * .28, height * .25, width * .72, height * .25, width * .82, height * .82]);
+  line([width * .1, height * .84, width * .34, height * .84]);
+  line([width * .66, height * .84, width * .9, height * .84]);
+  group.add(new Konva.Rect({ x: width * .23, y: height * .18, width: width * .54, height: strokeWidth * 1.7, cornerRadius: strokeWidth, fill: color, stroke: '#ffffff', strokeWidth: 1.5 }));
+  return group;
+};
+
+const pole = (element: BoardElement, context: RenderContext): Konva.Group => {
+  const { group, width, height } = elementBox(element, context, .032, .115, 3.4);
+  const color = elementColor(element, '#f97316');
+  const poleWidth = Math.max(5, width * .22);
+  group.add(new Konva.Ellipse({ x: width / 2, y: height * .88, radiusX: width * .38, radiusY: height * .08, fill: '#0f172a', opacity: .18 }));
+  group.add(new Konva.Line({ points: [width / 2, height * .12, width / 2, height * .83], stroke: '#ffffff', strokeWidth: poleWidth + 4, lineCap: 'round' }));
+  group.add(new Konva.Line({ points: [width / 2, height * .12, width / 2, height * .83], stroke: color, strokeWidth: poleWidth, lineCap: 'round' }));
+  for (const y of [.32, .54]) group.add(new Konva.Rect({ x: width / 2 - poleWidth / 2, y: height * y, width: poleWidth, height: height * .08, fill: '#ffffff', listening: false }));
+  group.add(new Konva.Ellipse({ x: width / 2, y: height * .84, radiusX: width * .38, radiusY: height * .09, fill: color, stroke: '#ffffff', strokeWidth: 2 }));
+  return group;
+};
+
 export function registerBuiltins(registry = new Registry()): Registry {
-  registry.registerElement('core.connector', {
+  registry.registerElement(CoreElements.connector, {
     transformable: false,
+    connectable: false,
     layer: 'connectors',
     render: (element, context) => {
       const points = routePoints(element, context);
@@ -175,12 +395,12 @@ export function registerBuiltins(registry = new Registry()): Registry {
       const tension = Number.isFinite(configuredTension) ? Math.max(0, Math.min(1, configuredTension)) : element.waypoints?.length ? .5 : 0;
       const centerline = smoothRoute(points, tension);
       const smoothPoints = centerline.flatMap(point => [point.x, point.y]);
-      if (line === 'screen') return screenShape(smoothPoints, color, width, 0, hitWidth);
-      if (line === 'shot') return shotShape(smoothPoints, color, width, 0, hitWidth);
+      if (line === 'screen') return withMovementLabel(screenShape(smoothPoints, color, width, 0, hitWidth), element, centerline, color);
+      if (line === 'shot') return withMovementLabel(shotShape(smoothPoints, color, width, 0, hitWidth), element, centerline, color);
       const configuredAmplitude = Number(element.style?.waveAmplitude);
       const configuredWavelength = Number(element.style?.wavelength);
       const configuredArrowLead = Number(element.style?.arrowLead);
-      return new Konva.Arrow({
+      return withMovementLabel(new Konva.Arrow({
         points: line === 'wavy' ? wavyPoints(
           centerline,
           Number.isFinite(configuredAmplitude) ? Math.max(0, configuredAmplitude) : 4.25,
@@ -197,9 +417,20 @@ export function registerBuiltins(registry = new Registry()): Registry {
         tension: 0,
         lineCap: 'round',
         lineJoin: 'round'
-      });
+      }), element, centerline, color);
     }
   });
+  registry.registerElement(CoreElements.zone, {
+    defaults: { width: .24, height: .14, style: { color: '#2563eb' } },
+    layer: 'background',
+    resize: { minWidth: .08, minHeight: .06, maxWidth: .9, maxHeight: .9, keepRatio: false },
+    connectable: false,
+    render: zone
+  });
+  registry.registerElement(CoreElements.text, { defaults: { width: .32, height: .11, style: { color: '#0f172a' }, data: { text: 'Text' } }, layer: 'annotations', connectable: false, render: freeText });
+  registry.registerElement(CoreElements.marker, { defaults: { width: .058, height: .058, style: { color: '#7c3aed' }, data: { text: 'A' } }, connectable: false, render: marker });
+  registry.registerElement(CoreElements.hurdle, { defaults: { width: .05, height: .045, style: { color: '#f97316' } }, connectable: false, render: hurdle });
+  registry.registerElement(CoreElements.pole, { defaults: { width: .032, height: .115, style: { color: '#f97316' } }, connectable: false, render: pole });
   return registry;
 }
 

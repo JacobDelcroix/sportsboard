@@ -89,6 +89,8 @@ export interface BoardMutationOptions {
   recordHistory?: boolean;
 }
 
+export type BoardChangeKind = 'content' | 'meta' | 'surface';
+
 export interface RenderContext {
   width: number;
   height: number;
@@ -97,9 +99,18 @@ export interface RenderContext {
 export interface ElementDefinition {
   defaults?: Partial<ElementInput>;
   transformable?: boolean;
+  /** Enables bounded visual resizing for this element only. */
+  resize?: {
+    minWidth: number;
+    minHeight: number;
+    maxWidth: number;
+    maxHeight: number;
+    keepRatio?: boolean;
+  };
   /** Allows connector endpoints to snap to this element. */
   connectable?: boolean;
-  layer?: 'content' | 'connectors';
+  /** Controls the visual and pointer-event stacking group. */
+  layer?: 'background' | 'annotations' | 'content' | 'connectors';
   connectionBoundary?: {
     shape?: 'ellipse' | 'rectangle';
     /** Gap around the element, relative to the surface width. */
@@ -116,5 +127,9 @@ export interface SurfaceDefinition {
   ratio: number;
   render(width: number, height: number, data?: Record<string, unknown>): Konva.Shape | Konva.Group;
 }
-export interface BoardChangeDetail { document: BoardDocument }
+export interface BoardChangeDetail {
+  document: BoardDocument;
+  /** Identifies the document area that changed so interfaces can avoid unrelated work. */
+  kind: BoardChangeKind;
+}
 export interface BoardModeDetail { mode: BoardMode; permissions: BoardPermissions }

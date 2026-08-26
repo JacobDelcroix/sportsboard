@@ -1,8 +1,21 @@
 # SportsBoard
 
+[![CI](https://github.com/JacobDelcroix/sportsboard/actions/workflows/ci.yml/badge.svg)](https://github.com/JacobDelcroix/sportsboard/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/%40jacobdelcroix%2Fsportsboard.svg)](https://www.npmjs.com/package/@jacobdelcroix/sportsboard)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 SportsBoard adds a complete sports tactic editor or a read-only board to a web page with one JavaScript import and one HTML element. Your application receives a portable JSON document and can also export PNG, JPEG, or WebP images.
 
 Basketball and football are included. Each sport provides half and full surfaces, its own players and ball, and suitable movement tools.
+
+## Why SportsBoard
+
+- Complete visual editor and lightweight read-only viewer from the same JSON document.
+- One declarative custom element for the common integration; focused JavaScript APIs remain available for advanced applications.
+- Responsive mouse, keyboard, touch, tablet, and mobile interactions.
+- Portable normalized coordinates, validated references, deterministic layers, undo/redo, notes, and image export.
+- Basketball and football included, with extensible sports, elements, surfaces, colors, and translations.
+- No framework or Tailwind runtime requirement. The package uses native web components and Konva.
 
 <p align="center">
   <img src="docs/assets/editor.jpg" alt="SportsBoard basketball editor" width="100%">
@@ -22,6 +35,19 @@ import '@jacobdelcroix/sportsboard/element';
 ```
 
 This registers `<sports-board-editor>` and `<sports-board-viewer>` for every page that loads the bundle. Internal interface styles are included automatically; Tailwind CSS is not required by the library.
+
+SportsBoard is an ESM package. Applications and contributors need Node.js 20 or newer; Laravel's Vite setup works without additional configuration. The editor targets modern browsers with custom elements, Canvas, `ResizeObserver`, and `structuredClone`. Form-associated custom-element support is required only for automatic native form submission; events and imperative reads work independently.
+
+Focused entry points are available when bundle size matters:
+
+| Import | Registers or exposes |
+| --- | --- |
+| `@jacobdelcroix/sportsboard/element` | Editor and viewer custom elements |
+| `@jacobdelcroix/sportsboard/editor/element` | Editor plus its internal viewer |
+| `@jacobdelcroix/sportsboard/viewer/element` | Viewer custom element only |
+| `@jacobdelcroix/sportsboard/editor` | Imperative editor class |
+| `@jacobdelcroix/sportsboard/viewer` | Imperative viewer and thumbnail APIs |
+| `@jacobdelcroix/sportsboard/core` | Low-level document, registry, and canvas APIs |
 
 ## Supported sports
 
@@ -93,6 +119,8 @@ One editor instance owns one sport. The application chooses the sport when it re
 The editor adapts to the width of its own container. On compact layouts, coaches switch between **Tools**, **Board**, and **Inspector** using the bottom navigation. Tapping a tool adds it at the center and returns to the board; desktop users can also drag tools directly onto the field. Touch gestures support element movement, pinch zoom, and panning an empty area while zoomed. On desktop, the wheel scrolls the surrounding page normally; hold `Cmd` or `Ctrl` while using it to zoom the board.
 
 The **Notes** button opens a dedicated writing drawer instead of using the narrow element inspector. It becomes a full-width sheet on compact layouts, saves while the coach types, and shows an indicator when the document contains notes.
+
+Every sport editor also includes shared annotations and training equipment: resizable transparent colored zones, multiline free text, free letter/number markers, hurdles, and poles. Hurdles and poles appear alongside the sport's other equipment. Select text or a movement to edit its wording in the Inspector. Run, dribble, and pass movements can be converted into one another without redrawing their route or losing their attachments.
 
 The **?** button inside the editor opens the built-in interaction guide. These shortcuts are available whenever focus is inside the editor and not inside a form field:
 
@@ -403,6 +431,12 @@ See [Contributing](CONTRIBUTING.md#add-a-language) to propose another built-in l
 - [Modes and permissions](docs/modes-and-permissions.md)
 - [Contributing](CONTRIBUTING.md)
 
+## Stability, security, and support
+
+The current document contract is `schema: "sportsboard"` with `version: 1`. Documents are validated before they replace the active board; invalid surfaces, elements, coordinates, references, attachments, and cycles are rejected without partially loading the document.
+
+SportsBoard follows [Semantic Versioning](https://semver.org/). See the [changelog](CHANGELOG.md) before upgrading, use [GitHub Issues](https://github.com/JacobDelcroix/sportsboard/issues) for reproducible bugs and feature proposals, and follow the [security policy](SECURITY.md) for vulnerabilities. Contributions are welcome under the [contribution guide](CONTRIBUTING.md).
+
 ## Local playground
 
 ```bash
@@ -417,6 +451,8 @@ Run the complete verification with:
 ```bash
 npm run check
 ```
+
+Maintainers can validate the exact publish path, including the npm archive, with `npm run release:check`.
 
 ## License
 
