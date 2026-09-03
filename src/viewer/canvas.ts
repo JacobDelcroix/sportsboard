@@ -23,11 +23,13 @@ export class SportsBoardCanvas extends EventTarget {
     mountViewerStyles();
     this.root = document.createElement('div');
     this.root.className = 'sb-canvas';
+    this.root.dataset.fit = boardOptions.mode === 'viewer' ? 'contain' : 'width';
     this.stageHost = document.createElement('div');
     this.stageHost.className = 'sb-canvas__stage';
     this.root.append(this.stageHost);
     this.target.replaceChildren(this.root);
     this.board = new SportsBoard(this.stageHost, boardOptions, registry);
+    this.applySurfaceRatio();
     if (controls) this.mountViewportControls();
     for (const name of FORWARDED_EVENTS) {
       this.board.addEventListener(name, event => {
@@ -42,8 +44,13 @@ export class SportsBoardCanvas extends EventTarget {
   toCanvas(options?: BoardImageOptions): HTMLCanvasElement { return this.board.toCanvas(options); }
   toDataURL(options?: BoardImageOptions): string { return this.board.toDataURL(options); }
   toBlob(options?: BoardImageOptions): Promise<Blob> { return this.board.toBlob(options); }
-  load(data: BoardDocument | string): void { this.board.load(data); }
+  load(data: BoardDocument | string): void { this.board.load(data); this.applySurfaceRatio(); }
   destroy(): void { this.board.destroy(); this.target.replaceChildren(); }
+
+  private applySurfaceRatio(): void {
+    const surface = this.board.registry.getSurface(this.board.getDocument().surface.type);
+    this.root.style.setProperty('--sb-surface-ratio', String(surface.ratio));
+  }
 
   private mountViewportControls(): void {
     const controls = document.createElement('div');

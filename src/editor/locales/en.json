@@ -63,7 +63,7 @@
   "helpTitle": "Editor help",
   "helpIntro": "The essential gestures and shortcuts for building a board quickly.",
   "helpBasicsTitle": "Main actions",
-  "helpBasicsSelect": "Tap an item to select it, then drag it to move it.",
+  "helpBasicsSelect": "Tap an item to select it, then drag it to move it. Double-click or double-tap it to open its properties.",
   "helpBasicsAdd": "Tap a tool to add it at the center, or drag it directly onto the board on desktop.",
   "helpBasicsMove": "Select a movement to adjust its route, or a colored zone to resize it with its handles.",
   "helpBasicsZoom": "Pinch, use the zoom controls, or hold Cmd/Ctrl while scrolling. A normal wheel gesture keeps scrolling the page. Drag an empty area while zoomed to move around the board.",

@@ -65,10 +65,38 @@ const generateImageButton = document.querySelector<HTMLButtonElement>('#generate
 const imageWidthSelect = document.querySelector<HTMLSelectElement>('#image-width')!;
 const imageFormatSelect = document.querySelector<HTMLSelectElement>('#image-format')!;
 const integrationHost = document.querySelector<HTMLElement>('.demo-integration')!;
+const containerWidthInput = document.querySelector<HTMLInputElement>('#demo-container-width')!;
+const containerHeightInput = document.querySelector<HTMLInputElement>('#demo-container-height')!;
+const containerWidthValue = document.querySelector<HTMLOutputElement>('#demo-container-width-value')!;
+const containerHeightValue = document.querySelector<HTMLOutputElement>('#demo-container-height-value')!;
+const containerSizeOutput = document.querySelector<HTMLOutputElement>('#demo-size-output')!;
 let mode: BoardMode = urlParameters.get('mode') === 'viewer' ? 'viewer' : 'editor';
 let activeSport = demoSports[0];
 let integration!: SportsBoardEditorElement | SportsBoardViewerElement;
 let previewUrl: string | null = null;
+const previewSizes: Record<BoardMode, { width: number; height: number }> = {
+  editor: { width: 1280, height: 760 },
+  viewer: { width: 640, height: 520 }
+};
+
+const applyContainerSize = (): void => {
+  const size = previewSizes[mode];
+  containerWidthInput.value = String(size.width);
+  containerHeightInput.value = String(size.height);
+  containerWidthValue.value = `${size.width} px`;
+  containerHeightValue.value = `${size.height} px`;
+  integrationHost.style.width = `${size.width}px`;
+  integrationHost.style.height = `${size.height}px`;
+  requestAnimationFrame(() => {
+    const bounds = integrationHost.getBoundingClientRect();
+    containerSizeOutput.value = `${Math.round(bounds.width)} × ${Math.round(bounds.height)} px`;
+  });
+};
+
+const updateContainerSize = (): void => {
+  previewSizes[mode] = { width: Number(containerWidthInput.value), height: Number(containerHeightInput.value) };
+  applyContainerSize();
+};
 
 const setStatus = (target: HTMLElement, message: string, tone: 'neutral' | 'success' | 'warning' | 'error' = 'neutral'): void => {
   target.textContent = message;
@@ -119,6 +147,7 @@ const renderMode = (): void => {
   const url = new URL(window.location.href);
   if (mode === 'viewer') url.searchParams.set('mode', 'viewer'); else url.searchParams.delete('mode');
   window.history.replaceState({}, '', url);
+  applyContainerSize();
 };
 
 const populateSportSelect = (): void => {
@@ -161,6 +190,17 @@ const switchMode = (nextMode: BoardMode): void => {
 
 editorButton.addEventListener('click', () => switchMode('editor'));
 viewerButton.addEventListener('click', () => switchMode('viewer'));
+containerWidthInput.addEventListener('input', updateContainerSize);
+containerHeightInput.addEventListener('input', updateContainerSize);
+document.querySelectorAll<HTMLButtonElement>('[data-preview-size]').forEach(button => button.addEventListener('click', () => {
+  const [width, height] = button.dataset.previewSize!.split('x').map(Number);
+  previewSizes[mode] = { width, height };
+  applyContainerSize();
+}));
+new ResizeObserver(() => {
+  const bounds = integrationHost.getBoundingClientRect();
+  containerSizeOutput.value = `${Math.round(bounds.width)} × ${Math.round(bounds.height)} px`;
+}).observe(integrationHost);
 
 jsonArea.addEventListener('input', () => {
   setStatus(jsonStatus, 'Modified', 'warning');

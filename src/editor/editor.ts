@@ -1,4 +1,4 @@
-import { CoreElements, type SportsBoard, type BoardChangeDetail, type BoardDocument, type BoardElement, type BoardImageOptions, type Endpoint, type Point, validateBoardDocument } from '../core/index.js';
+import { CoreElements, type SportsBoard, type BoardChangeDetail, type BoardDocument, type BoardElement, type BoardElementActivateDetail, type BoardImageOptions, type Endpoint, type Point, validateBoardDocument } from '../core/index.js';
 import { defineSportsBoardViewerElement, SportsBoardViewerElement } from '../element/viewer-element.js';
 import { SportsBoardCanvas } from '../viewer/index.js';
 import { createClipboardElement } from './clipboard.js';
@@ -238,12 +238,14 @@ export class SportsBoardEditor extends EventTarget {
       this.dispatchEvent(new CustomEvent('viewportchange', { detail: (event as CustomEvent).detail }));
     });
     this.board = this.canvas.getBoard();
+    this.applySurfaceRatio(surface);
     this.board.addEventListener('change', event => {
       const detail = (event as CustomEvent<BoardChangeDetail>).detail;
       if (shouldRefreshColorPalette(detail)) this.renderColorPicker();
       this.dispatchEvent(new CustomEvent('change', { detail: { document: this.board.getDocument() } }));
     });
     this.board.addEventListener('selectionchange', event => this.handleSelection((event as CustomEvent<{ selectedIds: string[] }>).detail.selectedIds[0] ?? null));
+    this.board.addEventListener('elementactivate', event => this.openInspector((event as CustomEvent<BoardElementActivateDetail>).detail.elementId));
   }
 
   private renderSurfaceButtons(activeSurface: string): void {
@@ -257,6 +259,7 @@ export class SportsBoardEditor extends EventTarget {
       button.addEventListener('click', () => {
         try {
           this.board.setSurface(surface.id);
+          this.applySurfaceRatio(surface.id);
           this.renderSurfaceButtons(surface.id);
           this.setStatus(this.message('surfaceActivated', { label: surface.label }), 'success');
         } catch (error) { this.setStatus((error as Error).message, 'error'); }
@@ -443,6 +446,23 @@ export class SportsBoardEditor extends EventTarget {
     this.propertyHistoryOpen = false;
     this.selectedId = targetId;
     this.updateSelection();
+  }
+
+  private openInspector(elementId: string): void {
+    this.selectedId = elementId;
+    this.updateSelection();
+    this.showMobilePanel('inspector');
+    const element = this.board.getDocument().elements.find(item => item.id === elementId);
+    const selector = element?.type === CoreElements.text || element?.type === CoreElements.marker
+      ? '[data-field="text"] textarea'
+      : element?.type === CoreElements.connector ? '[data-field="movement-label"] input' : undefined;
+    if (!selector) return;
+    requestAnimationFrame(() => {
+      const input = this.root.querySelector<HTMLInputElement | HTMLTextAreaElement>(selector);
+      if (!input || input.closest<HTMLElement>('.sb-editor__field')?.hidden) return;
+      input.focus({ preventScroll: true });
+      input.select();
+    });
   }
 
   private updateSelection(): void {
@@ -703,7 +723,9 @@ export class SportsBoardEditor extends EventTarget {
       const changed = direction === 'undo' ? this.board.undo() : this.board.redo();
       this.selectedId = null;
       this.updateSelection();
-      this.renderSurfaceButtons(this.board.getDocument().surface.type);
+      const surface = this.board.getDocument().surface.type;
+      this.applySurfaceRatio(surface);
+      this.renderSurfaceButtons(surface);
       this.populateNotes();
       this.notesHistoryOpen = false;
       this.setStatus(changed ? (direction === 'undo' ? this.messages.actionUndone : this.messages.actionRedone) : this.messages.noActionAvailable, changed ? 'success' : 'info');
@@ -744,6 +766,10 @@ export class SportsBoardEditor extends EventTarget {
   private updateNotesIndicator(): void {
     const hasNotes = this.query<HTMLTextAreaElement>('.sb-editor__notes').value.trim().length > 0;
     this.query<HTMLButtonElement>('[data-action="notes"]').dataset.hasNotes = String(hasNotes);
+  }
+
+  private applySurfaceRatio(surface: string): void {
+    this.root.style.setProperty('--sb-surface-ratio', String(this.board.registry.getSurface(surface).ratio));
   }
 
   private save(): void {

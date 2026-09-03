@@ -21,7 +21,7 @@ export class SportsBoardViewer extends EventTarget {
     this.target = element;
     this.options = options;
     this.root = document.createElement('div');
-    this.root.className = 'sb-viewer';
+    this.root.className = 'sb-viewer sb-viewer--standalone';
     this.root.setAttribute('aria-label', resolveViewerMessages(options.locale, options.messages).boardLabel);
     this.boardHost = document.createElement('div');
     this.boardHost.className = 'sb-viewer__board';

@@ -63,7 +63,7 @@
   "helpTitle": "Aide de l’éditeur",
   "helpIntro": "Les gestes et raccourcis essentiels pour construire rapidement un schéma.",
   "helpBasicsTitle": "Actions principales",
-  "helpBasicsSelect": "Touchez un élément pour le sélectionner, puis faites-le glisser pour le déplacer.",
+  "helpBasicsSelect": "Touchez un élément pour le sélectionner, puis faites-le glisser pour le déplacer. Double-cliquez ou touchez-le deux fois pour ouvrir ses propriétés.",
   "helpBasicsAdd": "Touchez un outil pour l’ajouter au centre ou, sur ordinateur, glissez-le directement sur le terrain.",
   "helpBasicsMove": "Sélectionnez un mouvement pour ajuster sa trajectoire, ou une zone colorée pour l’étendre avec ses poignées.",
   "helpBasicsZoom": "Pincez, utilisez les boutons de zoom ou maintenez Cmd/Ctrl en utilisant la molette. La molette seule continue de faire défiler la page. Une fois agrandi, glissez une zone vide pour déplacer le terrain.",

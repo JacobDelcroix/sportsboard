@@ -102,7 +102,7 @@ Give the editor a parent with the space it should use, then add the element:
 }
 ```
 
-The custom element always uses `width: 100%` and `height: 100%`. The surrounding application therefore controls its placement and available space. SportsBoard does not use Shadow DOM, so normal application classes and Tailwind utilities work on the element:
+The custom element always uses `width: 100%` and `height: 100%`. The surrounding application therefore controls its placement and available space. The editor and viewer preserve the sport-specific field ratio while fitting both the available width and height. Tool and property panels scroll independently when their content is taller than the editor container. SportsBoard does not use Shadow DOM, so normal application classes and Tailwind utilities work on the element:
 
 ```html
 <sports-board-editor
@@ -116,7 +116,7 @@ One editor instance owns one sport. The application chooses the sport when it re
 
 ### Tablet, mobile, and keyboard use
 
-The editor adapts to the width of its own container. On compact layouts, coaches switch between **Tools**, **Board**, and **Inspector** using the bottom navigation. Tapping a tool adds it at the center and returns to the board; desktop users can also drag tools directly onto the field. Touch gestures support element movement, pinch zoom, and panning an empty area while zoomed. On desktop, the wheel scrolls the surrounding page normally; hold `Cmd` or `Ctrl` while using it to zoom the board.
+The editor adapts to the width of its own container. On compact layouts, coaches switch between **Tools**, **Board**, and **Inspector** using the bottom navigation. Tapping a tool adds it at the center and returns to the board; desktop users can also drag tools directly onto the field. Double-click or double-tap an element or movement to open its editable properties. Touch gestures support element movement, pinch zoom, and panning an empty area while zoomed. On desktop, the wheel scrolls the surrounding page normally; hold `Cmd` or `Ctrl` while using it to zoom the board.
 
 The **Notes** button opens a dedicated writing drawer instead of using the narrow element inspector. It becomes a full-width sheet on compact layouts, saves while the coach types, and shows an indicator when the document contains notes.
 
@@ -136,7 +136,7 @@ The **?** button inside the editor opens the built-in interaction guide. These s
 | Open help | `?` |
 | Zoom with the wheel | `Cmd/Ctrl + wheel` |
 
-For a comfortable touch target, give a phone editor at least the visible viewport height when possible:
+The editor supports containers down to `480px` high. For the most comfortable touch workflow, give a phone editor the visible viewport height when possible:
 
 ```css
 .board-container {

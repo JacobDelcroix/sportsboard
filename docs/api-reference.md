@@ -13,7 +13,7 @@ The import registers:
 - `<sports-board-editor>` for the complete editing interface;
 - `<sports-board-viewer>` for a read-only canvas.
 
-Both elements are responsive hosts with `width: 100%` and `height: 100%`. The editor uses container queries, so its compact tablet/mobile interface follows the space allocated by the application instead of the full browser width. They use the light DOM, so application CSS classes apply normally.
+Both elements are responsive hosts with `width: 100%` and `height: 100%`. The editor uses size container queries, so its compact tablet/mobile interface follows the space allocated by the application instead of the full browser viewport. Editor and viewer fields preserve the active surface ratio while fitting the available height; the editor keeps a protected minimum, and its tools and inspector scroll independently. They use the light DOM, so application CSS classes apply normally.
 
 Focused imports and imperative integrations are covered in [Alternative integration methods](alternative-integrations.md).
 

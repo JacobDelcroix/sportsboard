@@ -60,6 +60,10 @@ export interface BoardViewportDetail {
   pan: Point;
 }
 
+export interface BoardElementActivateDetail {
+  elementId: string;
+}
+
 export interface SnapOptions { grid?: number; elements?: boolean; threshold?: number }
 export interface BoardOptions {
   mode?: BoardMode;

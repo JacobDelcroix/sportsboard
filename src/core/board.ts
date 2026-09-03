@@ -6,7 +6,7 @@ import { isElementEndpoint, registerBuiltins } from './builtins.js';
 import { detachElementReferences } from './references.js';
 import { MODE_PRESETS } from './types.js';
 import { validateBoardDocument } from './validation.js';
-import type { BoardChangeDetail, BoardDocument, BoardElement, BoardImageOptions, BoardMode, BoardModeDetail, BoardMutationOptions, BoardOptions, BoardPermissions, BoardUIState, BoardViewportDetail, ElementInput, Endpoint, PermissionOverrides, Point } from './types.js';
+import type { BoardChangeDetail, BoardDocument, BoardElement, BoardElementActivateDetail, BoardImageOptions, BoardMode, BoardModeDetail, BoardMutationOptions, BoardOptions, BoardPermissions, BoardUIState, BoardViewportDetail, ElementInput, Endpoint, PermissionOverrides, Point } from './types.js';
 
 const clone = <T>(value: T): T => structuredClone(value);
 const id = (): string => globalThis.crypto?.randomUUID?.() ?? `sb-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -354,6 +354,7 @@ export class SportsBoard extends EventTarget {
       node.setAttrs({ id: element.id, name: 'sportsboard-element', draggable: this.interactive && this.permissions.move && element.x !== undefined && element.y !== undefined });
       if (this.interactive) {
         node.on('pointerdown', event => { if (this.mode === 'viewer') return; event.cancelBubble = true; if (this.permissions.select) this.select(element.id); });
+        node.on('dblclick dbltap', event => { event.cancelBubble = true; this.activateElement(element.id); });
         let beforeDrag: BoardDocument | undefined;
         node.on('dragstart', () => { beforeDrag = clone(this.document); this.magnetCandidateById.delete(element.id); });
         node.on('dragmove', () => { this.applySnap(node); this.applyMagnet(node, element); this.scheduleConnectorRender(element.id); });
@@ -437,15 +438,7 @@ export class SportsBoard extends EventTarget {
       node.setAttrs({ id: element.id, name: 'sportsboard-element', draggable: false });
       if (this.interactive) {
         node.on('pointerdown', event => { if (this.mode === 'viewer') return; event.cancelBubble = true; if (this.permissions.select) this.select(element.id); });
-        node.on('dblclick dbltap', event => {
-          event.cancelBubble = true;
-          if (!this.permissions.editProperties) return;
-          const pointer = this.stage.getPointerPosition();
-          if (pointer) {
-            const point = this.viewportToBoard(pointer);
-            this.addWaypoint(element.id, { x: point.x / this.stage.width(), y: point.y / this.stage.height() });
-          }
-        });
+        node.on('dblclick dbltap', event => { event.cancelBubble = true; this.activateElement(element.id); });
       }
       this.nodeById.set(element.id, node);
       this.connectorLayer.add(renderedNode);
@@ -623,6 +616,12 @@ export class SportsBoard extends EventTarget {
       handle.on('dblclick dbltap', event => { event.cancelBubble = true; this.removeWaypoint(element.id, index); });
       this.connectorHandles.add(handle);
     });
+  }
+
+  private activateElement(elementId: string): void {
+    if (this.mode === 'viewer' || !this.permissions.select || !this.permissions.editProperties) return;
+    this.select(elementId);
+    this.dispatchEvent(new CustomEvent<BoardElementActivateDetail>('elementactivate', { detail: { elementId } }));
   }
   private syncConnectorHandlePositions(): void {
     const element = this.elementById.get(this.ui.selectedIds[0]);

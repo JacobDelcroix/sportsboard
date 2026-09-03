@@ -4,6 +4,17 @@ All notable changes to SportsBoard are documented in this file. The project foll
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-03
+
+### Changed
+
+- Editor and viewer fields now fit both the available container width and height while preserving the active surface ratio.
+- Tool and movement buttons are more compact, with clearer spacing between player buttons.
+- The tool palette now scrolls independently in short editor containers.
+- The playground now includes live width and height controls with desktop, tablet, mobile, and short-container presets.
+- Zoom controls are now smaller and anchored to the bottom-right corner of the field.
+- Double-clicking or double-tapping an element or movement now opens its editable properties, including the compact-layout Inspector panel.
+
 ## [1.1.0] - 2026-09-03
 
 ### Changed
@@ -41,7 +52,8 @@ All notable changes to SportsBoard are documented in this file. The project foll
 - Complete document validation, attachment safety, deterministic semantic layers, and non-destructive connector detachment.
 - Automated type checking, tests, package export verification, playground build, and GitHub Actions CI.
 
-[Unreleased]: https://github.com/JacobDelcroix/sportsboard/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/JacobDelcroix/sportsboard/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/JacobDelcroix/sportsboard/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/JacobDelcroix/sportsboard/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/JacobDelcroix/sportsboard/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/JacobDelcroix/sportsboard/releases/tag/v1.0.0

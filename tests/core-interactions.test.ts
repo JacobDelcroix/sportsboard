@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MODE_PRESETS, SportsBoard, type BoardPermissions } from '../src/core/index.js';
 import { constrainTransformerBox, requestsWheelZoom } from '../src/core/interactions.js';
 
@@ -50,5 +50,40 @@ describe('board update permissions', () => {
 
   it('does not let update bypass the rotate permission', () => {
     expect(() => boardWithPermissions({ rotate: false }).update('missing', { rotation: 10 })).toThrow("permission 'rotate'");
+  });
+});
+
+describe('board element activation', () => {
+  const activatableBoard = (overrides: Partial<BoardPermissions> = {}): SportsBoard => {
+    const board = Object.setPrototypeOf(new EventTarget(), SportsBoard.prototype) as SportsBoard;
+    Object.assign(board as unknown as Record<string, unknown>, {
+      mode: 'editor',
+      permissions: { ...MODE_PRESETS.editor, ...overrides },
+      select: vi.fn()
+    });
+    return board;
+  };
+
+  it('selects the element and announces that its properties should open', () => {
+    const board = activatableBoard();
+    const activated = vi.fn();
+    board.addEventListener('elementactivate', activated);
+
+    (board as unknown as { activateElement: (elementId: string) => void }).activateElement('player-1');
+
+    expect(board.select).toHaveBeenCalledWith('player-1');
+    expect(activated).toHaveBeenCalledOnce();
+    expect((activated.mock.calls[0][0] as CustomEvent).detail).toEqual({ elementId: 'player-1' });
+  });
+
+  it('does nothing when property editing is unavailable', () => {
+    const board = activatableBoard({ editProperties: false });
+    const activated = vi.fn();
+    board.addEventListener('elementactivate', activated);
+
+    (board as unknown as { activateElement: (elementId: string) => void }).activateElement('player-1');
+
+    expect(board.select).not.toHaveBeenCalled();
+    expect(activated).not.toHaveBeenCalled();
   });
 });

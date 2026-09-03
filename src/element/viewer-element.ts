@@ -145,7 +145,7 @@ export class SportsBoardViewerElement extends HTMLElementBase {
     this.managedByEditor = managedByEditor;
     this.instance?.destroy();
     const root = document.createElement('div');
-    root.className = 'sb-viewer';
+    root.className = `sb-viewer ${managedByEditor ? 'sb-viewer--embedded' : 'sb-viewer--standalone'}`;
     const board = document.createElement('div');
     board.className = 'sb-viewer__board';
     root.append(board);
