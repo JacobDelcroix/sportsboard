@@ -74,6 +74,7 @@
   "shortcutDelete": "Supprimer la sélection",
   "shortcutUndo": "Annuler",
   "shortcutRedo": "Rétablir",
+  "shortcutRotate": "Tourner la sélection de 10°",
   "shortcutDeselect": "Désélectionner ou fermer l’aide",
   "shortcutHelp": "Ouvrir cette aide"
 }

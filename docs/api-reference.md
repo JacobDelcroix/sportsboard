@@ -265,7 +265,7 @@ Documents are validated against the active sport registry before loading. Unknow
 import { SportsBoard } from '@jacobdelcroix/sportsboard/core';
 ```
 
-`SportsBoard` is intended for custom interfaces and sport extensions. It exposes mutations (`add`, `update`, `remove`, `clear`), history (`undo`, `redo`), selection, surface changes, waypoint editing, permissions, zoom, pan, serialization, and image export. Pass `{ recordHistory: false }` as the third argument to `update()` when coalescing several live property inputs into one undo step.
+`SportsBoard` is intended for custom interfaces and sport extensions. It exposes mutations (`add`, `update`, `remove`, `clear`), history (`undo`, `redo`), selection, surface changes, waypoint editing, permissions, zoom, pan, serialization, and image export. Pass `{ recordHistory: false }` as the third argument to `update()` when coalescing several live property inputs into one undo step. Position and rotation patches also enforce the `move` and `rotate` permissions respectively.
 
 ## Localization catalogs
 

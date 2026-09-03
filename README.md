@@ -6,7 +6,7 @@
 
 SportsBoard adds a complete sports tactic editor or a read-only board to a web page with one JavaScript import and one HTML element. Your application receives a portable JSON document and can also export PNG, JPEG, or WebP images.
 
-Basketball and football are included. Each sport provides half and full surfaces, its own players and ball, and suitable movement tools.
+Basketball and football are included. Each sport provides half and full surfaces with usable space outside the boundary lines, its own players and ball, and suitable movement tools.
 
 ## Why SportsBoard
 

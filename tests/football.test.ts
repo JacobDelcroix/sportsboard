@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import Konva from 'konva';
 import { validateBoardDocument, type BoardDocument } from '../src/core/index.js';
 import { Football, createFootballViewer } from '../src/sports/football/viewer-entry.js';
 
@@ -28,5 +29,19 @@ describe('football module', () => {
     expect(ball.defaults?.width).toBeLessThan(player.defaults?.width ?? 0);
     expect(ball.connectable).toBe(false);
     expect(ball.magnet?.targetTypes).toEqual([Football.elements.player]);
+  });
+
+  it.each([Football.surfaces.halfPitch, Football.surfaces.fullPitch])('keeps usable space outside %s', surfaceId => {
+    const surface = createFootballViewer().createRegistry().getSurface(surfaceId);
+    const width = 1000;
+    const height = width / surface.ratio;
+    const group = surface.render(width, height) as Konva.Group;
+    const children = group.getChildren();
+    const boundary = children[children.length - 1] as Konva.Rect;
+
+    expect(boundary.x()).toBeGreaterThan(0);
+    expect(boundary.y()).toBeGreaterThan(0);
+    expect(boundary.x() + boundary.width()).toBeLessThan(width);
+    expect(boundary.y() + boundary.height()).toBeLessThan(height);
   });
 });

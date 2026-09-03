@@ -30,6 +30,8 @@ Available surfaces:
 - `basketball.halfcourt`;
 - `basketball.fullcourt`.
 
+Both surfaces include 1.25 metres of usable wooden floor around every court boundary. The inset boundary lines make the playing area explicit while leaving enough room for waiting players, coaches, and equipment without overwhelming the diagram.
+
 Available editor elements:
 
 - attackers numbered 1–5;
@@ -49,7 +51,11 @@ Available movements:
 - shot;
 - screen.
 
-The ball can snap to an attacker or defender and follows that player. Movements attach to players, never to the ball, training hoops, or additional baskets. The two additional pieces of equipment remain freely movable and rotatable.
+The ball can snap to an attacker, defender, or coach and follows that element. Movements can also attach to players or coaches, never to the ball, training hoops, or additional baskets. The two additional pieces of equipment remain freely movable and rotatable.
+
+For faster editing, select an attacker, defender, or coach before clicking the Ball tool. The new ball is immediately attached to that selection. Dragging the Ball tool onto the board still creates a freely positioned ball.
+
+Defenders inserted on the half court start at a 180-degree rotation so the basket is naturally behind them. Full-court defenders keep the neutral orientation because either basket may be defended. This default applies only when inserting an element; rotation remains editable afterward.
 
 Programmatic movement helpers are also exported:
 
@@ -72,7 +78,7 @@ Available surfaces:
 - `football.halfpitch`;
 - `football.fullpitch`.
 
-The surfaces use the proportions and main markings of a 105 × 68 metre pitch. The half pitch keeps the 68 × 52.5 ratio.
+The playable areas use the proportions and main markings of a 105 × 68 metre pitch. The half pitch keeps a 68 × 52.5 metre playing area. Both surfaces add four metres of usable grass outside every touchline and goal line; goals are rendered in this outer area.
 
 Available editor elements:
 
@@ -87,6 +93,8 @@ Available movements:
 - shot.
 
 The football can snap to a player and follows that player. It cannot become a movement endpoint.
+
+Selecting a player before clicking the Ball tool attaches the new ball immediately. Dragging the tool onto the pitch remains available for free placement.
 
 Programmatic helpers are exported in the same way:
 

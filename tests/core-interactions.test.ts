@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { MODE_PRESETS, SportsBoard, type BoardPermissions } from '../src/core/index.js';
 import { constrainTransformerBox, requestsWheelZoom } from '../src/core/interactions.js';
+
+const boardWithPermissions = (overrides: Partial<BoardPermissions>): SportsBoard => {
+  const board = Object.create(SportsBoard.prototype) as SportsBoard;
+  (board as unknown as { permissions: BoardPermissions }).permissions = { ...MODE_PRESETS.editor, ...overrides };
+  return board;
+};
 
 describe('board wheel interactions', () => {
   it('leaves an unmodified wheel gesture to the surrounding page', () => {
@@ -33,5 +40,15 @@ describe('board transformer constraints', () => {
     const bounds = { minWidth: .08, minHeight: .06, maxWidth: .9, maxHeight: .9 };
 
     expect(constrainTransformerBox(oldBox, resized, bounds, 800, 500, 1)).toBe(oldBox);
+  });
+});
+
+describe('board update permissions', () => {
+  it('does not let update bypass the move permission', () => {
+    expect(() => boardWithPermissions({ move: false }).update('missing', { x: .5 })).toThrow("permission 'move'");
+  });
+
+  it('does not let update bypass the rotate permission', () => {
+    expect(() => boardWithPermissions({ rotate: false }).update('missing', { rotation: 10 })).toThrow("permission 'rotate'");
   });
 });

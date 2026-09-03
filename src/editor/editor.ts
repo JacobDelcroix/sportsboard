@@ -2,7 +2,7 @@ import { CoreElements, type SportsBoard, type BoardChangeDetail, type BoardDocum
 import { defineSportsBoardViewerElement, SportsBoardViewerElement } from '../element/viewer-element.js';
 import { SportsBoardCanvas } from '../viewer/index.js';
 import { createClipboardElement } from './clipboard.js';
-import { shouldRefreshColorPalette } from './change.js';
+import { attachToSelectedMagnetTarget, shouldRefreshColorPalette, steppedRotation } from './change.js';
 import { createCoreEditorTools, movementConversionPatch, type ConvertibleMovement } from './generic-tools.js';
 import { resolveEditorMessages } from './i18n.js';
 import { mountEditorStyles } from './styles.js';
@@ -199,6 +199,7 @@ export class SportsBoardEditor extends EventTarget {
               <div><dt><kbd>⌫</kbd></dt><dd data-help="delete"></dd></div>
               <div><dt><kbd>⌘ / Ctrl</kbd><b>+</b><kbd>Z</kbd></dt><dd data-help="undo"></dd></div>
               <div><dt><kbd>⌘ / Ctrl</kbd><b>+</b><kbd>⇧</kbd><b>+</b><kbd>Z</kbd></dt><dd data-help="redo"></dd></div>
+              <div><dt><kbd>←</kbd><b>/</b><kbd>→</kbd></dt><dd data-help="rotate"></dd></div>
               <div><dt><kbd>Esc</kbd></dt><dd data-help="deselect"></dd></div>
               <div><dt><kbd>?</kbd></dt><dd data-help="shortcut-help"></dd></div>
             </dl></section>
@@ -321,7 +322,7 @@ export class SportsBoardEditor extends EventTarget {
     button.addEventListener('click', () => {
       try {
         if ('target' in tool) this.addConnector(tool);
-        else this.addElement(tool, { x: .5, y: .5 });
+        else this.addElement(tool, { x: .5, y: .5 }, true);
         this.showMobilePanel('board');
         this.focusBoard();
       } catch (error) { this.setStatus((error as Error).message, 'error'); }
@@ -385,8 +386,12 @@ export class SportsBoardEditor extends EventTarget {
     catch (error) { this.setStatus((error as Error).message, 'error'); }
   }
 
-  private addElement(tool: EditorElementTool, point: Point): void {
-    const added = this.board.add(tool.create(point, this.board));
+  private addElement(tool: EditorElementTool, point: Point, attachToSelection = false): void {
+    const created = tool.create(point, this.board);
+    const selected = attachToSelection && this.selectedId
+      ? this.board.getDocument().elements.find(element => element.id === this.selectedId)
+      : undefined;
+    const added = this.board.add(attachToSelectedMagnetTarget(created, selected, this.board.registry));
     this.board.select(added.id);
     this.setStatus(this.message('elementAdded', { label: tool.label }), 'success');
   }
@@ -630,6 +635,17 @@ export class SportsBoardEditor extends EventTarget {
       if (key === 'y') this.history('redo');
       return;
     }
+    if (!command && !event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && this.selectedId && this.board.getPermissions().rotate) {
+      const element = this.board.getDocument().elements.find(item => item.id === this.selectedId);
+      if (element && this.board.registry.getElement(element.type).transformable !== false) {
+        event.preventDefault();
+        event.stopPropagation();
+        try {
+          this.board.update(element.id, { rotation: steppedRotation(element.rotation, event.key === 'ArrowLeft' ? -1 : 1) });
+        } catch (error) { this.setStatus((error as Error).message, 'error'); }
+      }
+      return;
+    }
     if ((event.key === 'Delete' || event.key === 'Backspace') && this.selectedId) {
       event.preventDefault();
       event.stopPropagation();
@@ -856,6 +872,7 @@ export class SportsBoardEditor extends EventTarget {
       ['delete', this.messages.shortcutDelete],
       ['undo', this.messages.shortcutUndo],
       ['redo', this.messages.shortcutRedo],
+      ['rotate', this.messages.shortcutRotate],
       ['deselect', this.messages.shortcutDeselect],
       ['shortcut-help', this.messages.shortcutHelp]
     ] as const) this.query<HTMLElement>(`[data-help="${name}"]`).textContent = value;

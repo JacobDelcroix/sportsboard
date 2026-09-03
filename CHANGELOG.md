@@ -2,6 +2,30 @@
 
 All notable changes to SportsBoard are documented in this file. The project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [1.1.0] - 2026-09-03
+
+### Changed
+
+- Added proportionate usable space outside the boundary lines of every basketball and football surface.
+- Football goals now render outside the playing area within the surrounding grass.
+- Basketball coaches now explicitly accept movement endpoints and ball attachment, matching player behavior.
+- Newly inserted basketball defenders face away from the basket by default on the half-court surface only.
+- Clicking the Ball tool now attaches it immediately to a compatible selected player or coach; drag-and-drop remains free placement.
+- Left and right arrow shortcuts now rotate the selected element in ten-degree steps.
+- Reduced the additional basketball basket by roughly 18% for better visual balance with players and training equipment.
+
+### Fixed
+
+- Low-level position and rotation updates can no longer bypass disabled `move` or `rotate` permissions.
+
+## [1.0.1] - 2026-08-26
+
+### Fixed
+
+- Published the initial npm package after the unavailable `1.0.0` release attempt.
+
 ## [1.0.0] - 2026-08-26
 
 ### Added
@@ -17,4 +41,7 @@ All notable changes to SportsBoard are documented in this file. The project foll
 - Complete document validation, attachment safety, deterministic semantic layers, and non-destructive connector detachment.
 - Automated type checking, tests, package export verification, playground build, and GitHub Actions CI.
 
+[Unreleased]: https://github.com/JacobDelcroix/sportsboard/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/JacobDelcroix/sportsboard/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/JacobDelcroix/sportsboard/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/JacobDelcroix/sportsboard/releases/tag/v1.0.0

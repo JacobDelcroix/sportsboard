@@ -188,6 +188,8 @@ export class SportsBoard extends EventTarget {
   }
   update(elementId: string, patch: Partial<Omit<BoardElement, 'id' | 'type'>>, options: BoardMutationOptions = {}): BoardElement {
     this.require('editProperties');
+    if ('x' in patch || 'y' in patch) this.require('move');
+    if ('rotation' in patch) this.require('rotate');
     const index = this.indexOf(elementId);
     const next = clone(this.document);
     next.elements[index] = { ...next.elements[index], ...clone(patch) };

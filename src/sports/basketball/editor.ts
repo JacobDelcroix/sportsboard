@@ -1,4 +1,4 @@
-import type { Point } from '../../core/index.js';
+import type { Point, SportsBoard } from '../../core/index.js';
 import type { EditorSportDefinition } from '../../editor/index.js';
 import type { SportsBoardLocale } from '../../viewer/index.js';
 import { Basketball } from './basketball.js';
@@ -12,7 +12,12 @@ const numbered = (kind: 'attacker' | 'defender', number: number, messages: Baske
   label: String(number),
   icon: String(number),
   description: (kind === 'attacker' ? messages.attackerDescription : messages.defenderDescription).replace('{number}', String(number)),
-  create: (point: Point) => ({ type: Basketball.elements[kind], ...point, data: { number } })
+  create: (point: Point, board: SportsBoard) => ({
+    type: Basketball.elements[kind],
+    ...point,
+    ...(kind === 'defender' && board.getDocument().surface.type === Basketball.surfaces.halfCourt ? { rotation: 180 } : {}),
+    data: { number }
+  })
 });
 
 /** Creates a complete localized basketball editor configuration. */

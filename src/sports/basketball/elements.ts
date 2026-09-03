@@ -287,13 +287,18 @@ const basket = (element: BoardElement, context: RenderContext): Konva.Group => {
 export function registerBasketballElements(registry: Registry): void {
   registry.registerElement('basketball.attacker', { defaults: { width: .07, height: .07, data: { number: 1 } }, connectionBoundary: { shape: 'ellipse', margin: .008 }, render: player(false) });
   registry.registerElement('basketball.defender', { defaults: { width: .07, height: .07, data: { number: 1 } }, connectionBoundary: { shape: 'ellipse', margin: .008 }, render: player(true) });
-  registry.registerElement('basketball.coach', { defaults: { width: .07, height: .07 }, connectionBoundary: { shape: 'ellipse', margin: .008 }, render: coach });
+  registry.registerElement('basketball.coach', {
+    defaults: { width: .07, height: .07 },
+    connectable: true,
+    connectionBoundary: { shape: 'ellipse', margin: .008 },
+    render: coach
+  });
   registry.registerElement('basketball.ball', {
     defaults: { width: .042, height: .042 },
     connectable: false,
     connectionBoundary: { shape: 'ellipse', margin: .006 },
     magnet: {
-      targetTypes: ['basketball.attacker', 'basketball.defender'],
+      targetTypes: ['basketball.attacker', 'basketball.defender', 'basketball.coach'],
       threshold: .075,
       anchors: [{ x: .06, y: .28 }, { x: .94, y: .28 }]
     },
@@ -302,5 +307,5 @@ export function registerBasketballElements(registry: Registry): void {
   registry.registerElement('basketball.cone', { defaults: { width: .04, height: .052 }, connectionBoundary: { shape: 'rectangle', margin: .005 }, render: cone });
   registry.registerElement('basketball.ladder', { defaults: { width: .07, height: .15 }, connectionBoundary: { shape: 'rectangle', margin: .006 }, render: ladder });
   registry.registerElement('basketball.training-hoop', { defaults: { width: .05, height: .05, style: { color: '#f97316' } }, connectable: false, render: trainingHoop });
-  registry.registerElement('basketball.basket', { defaults: { width: .17, height: .09, style: { color: '#475569' } }, connectable: false, render: basket });
+  registry.registerElement('basketball.basket', { defaults: { width: .14, height: .075, style: { color: '#475569' } }, connectable: false, render: basket });
 }

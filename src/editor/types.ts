@@ -119,6 +119,7 @@ export interface EditorMessages extends ViewerMessages {
   shortcutDelete: string;
   shortcutUndo: string;
   shortcutRedo: string;
+  shortcutRotate: string;
   shortcutDeselect: string;
   shortcutHelp: string;
 }

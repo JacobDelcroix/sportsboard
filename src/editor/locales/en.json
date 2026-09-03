@@ -74,6 +74,7 @@
   "shortcutDelete": "Delete selection",
   "shortcutUndo": "Undo",
   "shortcutRedo": "Redo",
+  "shortcutRotate": "Rotate selection by 10°",
   "shortcutDeselect": "Deselect or close help",
   "shortcutHelp": "Open this help"
 }

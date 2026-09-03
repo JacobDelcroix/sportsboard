@@ -4,6 +4,7 @@ import type { Registry } from '../../core/index.js';
 const COURT_LENGTH = 28;
 const COURT_WIDTH = 15;
 const HALF_LENGTH = 14;
+const COURT_RUNOFF = 1.25;
 const BASKET_OFFSET = 1.575;
 const BACKBOARD_OFFSET = 1.2;
 const BACKBOARD_WIDTH = 1.8;
@@ -50,9 +51,15 @@ const courtGroup = (width: number, height: number, horizontal: boolean): Konva.G
 
 const renderHalfCourt = (width: number, height: number): Konva.Group => {
   const group = courtGroup(width, height, false);
-  const x = (meters: number) => meters / COURT_WIDTH * width;
-  const y = (meters: number) => meters / HALF_LENGTH * height;
-  const scale = (width / COURT_WIDTH + height / HALF_LENGTH) / 2;
+  const surfaceWidth = COURT_WIDTH + COURT_RUNOFF * 2;
+  const surfaceHeight = HALF_LENGTH + COURT_RUNOFF * 2;
+  const scaleX = width / surfaceWidth;
+  const scaleY = height / surfaceHeight;
+  const x = (meters: number) => (meters + COURT_RUNOFF) * scaleX;
+  const y = (meters: number) => (meters + COURT_RUNOFF) * scaleY;
+  const metricWidth = (meters: number) => meters * scaleX;
+  const metricHeight = (meters: number) => meters * scaleY;
+  const scale = (scaleX + scaleY) / 2;
   const strokeWidth = Math.max(2, .05 * scale);
   const stroke = '#fffdf7';
   const addLine = (points: Point[], options: Partial<Konva.LineConfig> = {}) => group.add(new Konva.Line({
@@ -74,7 +81,7 @@ const renderHalfCourt = (width: number, height: number): Konva.Group => {
   const leftAngle = Math.atan2(intersectionY - basket.y, CORNER_DISTANCE - basket.x);
   const rightAngle = Math.atan2(intersectionY - basket.y, COURT_WIDTH - CORNER_DISTANCE - basket.x);
 
-  group.add(new Konva.Rect({ x: x(paintLeft), y: 0, width: x(PAINT_WIDTH), height: y(PAINT_DEPTH), fill: 'rgba(37,99,235,.07)' }));
+  group.add(new Konva.Rect({ x: x(paintLeft), y: y(0), width: metricWidth(PAINT_WIDTH), height: metricHeight(PAINT_DEPTH), fill: 'rgba(37,99,235,.07)' }));
   addLine([{ x: paintLeft, y: 0 }, { x: paintLeft, y: PAINT_DEPTH }, { x: paintLeft + PAINT_WIDTH, y: PAINT_DEPTH }, { x: paintLeft + PAINT_WIDTH, y: 0 }]);
   addCircle({ x: centerX, y: PAINT_DEPTH }, CIRCLE_RADIUS, { fill: 'rgba(255,255,255,.025)' });
 
@@ -87,15 +94,29 @@ const renderHalfCourt = (width: number, height: number): Konva.Group => {
   addCircle(basket, .225, { stroke: '#f97316', strokeWidth: strokeWidth * 1.4, fill: 'rgba(249,115,22,.10)' });
   addLine([{ x: centerX, y: BACKBOARD_OFFSET }, { x: centerX, y: basket.y - .225 }], { stroke: '#f97316' });
 
-  group.add(new Konva.Rect({ x: strokeWidth / 2, y: strokeWidth / 2, width: width - strokeWidth, height: height - strokeWidth, stroke, strokeWidth, cornerRadius: Math.max(2, strokeWidth) }));
+  group.add(new Konva.Rect({
+    x: x(0),
+    y: y(0),
+    width: metricWidth(COURT_WIDTH),
+    height: metricHeight(HALF_LENGTH),
+    stroke,
+    strokeWidth,
+    cornerRadius: Math.max(2, strokeWidth)
+  }));
   return group;
 };
 
 const renderFullCourt = (width: number, height: number): Konva.Group => {
   const group = courtGroup(width, height, true);
-  const x = (meters: number) => meters / COURT_LENGTH * width;
-  const y = (meters: number) => meters / COURT_WIDTH * height;
-  const scale = (width / COURT_LENGTH + height / COURT_WIDTH) / 2;
+  const surfaceWidth = COURT_LENGTH + COURT_RUNOFF * 2;
+  const surfaceHeight = COURT_WIDTH + COURT_RUNOFF * 2;
+  const scaleX = width / surfaceWidth;
+  const scaleY = height / surfaceHeight;
+  const x = (meters: number) => (meters + COURT_RUNOFF) * scaleX;
+  const y = (meters: number) => (meters + COURT_RUNOFF) * scaleY;
+  const metricWidth = (meters: number) => meters * scaleX;
+  const metricHeight = (meters: number) => meters * scaleY;
+  const scale = (scaleX + scaleY) / 2;
   const strokeWidth = Math.max(2, .05 * scale);
   const stroke = '#fffdf7';
   const addLine = (points: Point[], options: Partial<Konva.LineConfig> = {}) => group.add(new Konva.Line({
@@ -123,7 +144,7 @@ const renderFullCourt = (width: number, height: number): Konva.Group => {
     const arcX = basketX + direction * arcAdvance;
     const paintTop = centerY - PAINT_WIDTH / 2;
 
-    group.add(new Konva.Rect({ x: x(paintStart), y: y(paintTop), width: x(PAINT_DEPTH), height: y(PAINT_WIDTH), fill: 'rgba(37,99,235,.07)' }));
+    group.add(new Konva.Rect({ x: x(paintStart), y: y(paintTop), width: metricWidth(PAINT_DEPTH), height: metricHeight(PAINT_WIDTH), fill: 'rgba(37,99,235,.07)' }));
     addLine([
       { x: baseline, y: paintTop }, { x: freeThrowX, y: paintTop },
       { x: freeThrowX, y: paintTop + PAINT_WIDTH }, { x: baseline, y: paintTop + PAINT_WIDTH }
@@ -151,11 +172,25 @@ const renderFullCourt = (width: number, height: number): Konva.Group => {
   drawEnd(true);
   addLine([{ x: COURT_LENGTH / 2, y: 0 }, { x: COURT_LENGTH / 2, y: COURT_WIDTH }]);
   addCircle({ x: COURT_LENGTH / 2, y: centerY }, CIRCLE_RADIUS, { fill: 'rgba(255,255,255,.025)' });
-  group.add(new Konva.Rect({ x: strokeWidth / 2, y: strokeWidth / 2, width: width - strokeWidth, height: height - strokeWidth, stroke, strokeWidth, cornerRadius: Math.max(2, strokeWidth) }));
+  group.add(new Konva.Rect({
+    x: x(0),
+    y: y(0),
+    width: metricWidth(COURT_LENGTH),
+    height: metricHeight(COURT_WIDTH),
+    stroke,
+    strokeWidth,
+    cornerRadius: Math.max(2, strokeWidth)
+  }));
   return group;
 };
 
 export function registerBasketballSurfaces(registry: Registry): void {
-  registry.registerSurface('basketball.halfcourt', { ratio: COURT_WIDTH / HALF_LENGTH, render: renderHalfCourt });
-  registry.registerSurface('basketball.fullcourt', { ratio: COURT_LENGTH / COURT_WIDTH, render: renderFullCourt });
+  registry.registerSurface('basketball.halfcourt', {
+    ratio: (COURT_WIDTH + COURT_RUNOFF * 2) / (HALF_LENGTH + COURT_RUNOFF * 2),
+    render: renderHalfCourt
+  });
+  registry.registerSurface('basketball.fullcourt', {
+    ratio: (COURT_LENGTH + COURT_RUNOFF * 2) / (COURT_WIDTH + COURT_RUNOFF * 2),
+    render: renderFullCourt
+  });
 }

@@ -4,6 +4,7 @@ import type { Registry } from '../../core/index.js';
 const PITCH_LENGTH = 105;
 const PITCH_WIDTH = 68;
 const HALF_LENGTH = PITCH_LENGTH / 2;
+const PITCH_RUNOFF = 4;
 const CENTER_RADIUS = 9.15;
 const PENALTY_AREA_DEPTH = 16.5;
 const PENALTY_AREA_WIDTH = 40.32;
@@ -49,16 +50,22 @@ const grass = (width: number, height: number, verticalStripes: boolean): Konva.G
 
 const renderFullPitch = (width: number, height: number): Konva.Group => {
   const group = grass(width, height, true);
-  const x = (meters: number) => meters / PITCH_LENGTH * width;
-  const y = (meters: number) => meters / PITCH_WIDTH * height;
-  const scale = (width / PITCH_LENGTH + height / PITCH_WIDTH) / 2;
+  const surfaceWidth = PITCH_LENGTH + PITCH_RUNOFF * 2;
+  const surfaceHeight = PITCH_WIDTH + PITCH_RUNOFF * 2;
+  const scaleX = width / surfaceWidth;
+  const scaleY = height / surfaceHeight;
+  const x = (meters: number) => (meters + PITCH_RUNOFF) * scaleX;
+  const y = (meters: number) => (meters + PITCH_RUNOFF) * scaleY;
+  const metricWidth = (meters: number) => meters * scaleX;
+  const metricHeight = (meters: number) => meters * scaleY;
+  const scale = (scaleX + scaleY) / 2;
   const strokeWidth = Math.max(1.7, .1 * scale);
   const stroke = 'rgba(255,255,255,.94)';
   const line = (points: MetricPoint[], options: Partial<Konva.LineConfig> = {}) => group.add(new Konva.Line({
     points: points.flatMap(point => [x(point.x), y(point.y)]), stroke, strokeWidth, lineCap: 'round', lineJoin: 'round', ...options
   }));
   const rect = (left: number, top: number, metricWidth: number, metricHeight: number, options: Partial<Konva.RectConfig> = {}) => group.add(new Konva.Rect({
-    x: x(left), y: y(top), width: x(metricWidth), height: y(metricHeight), stroke, strokeWidth, ...options
+    x: x(left), y: y(top), width: metricWidth * scaleX, height: metricHeight * scaleY, stroke, strokeWidth, ...options
   }));
   const circle = (center: MetricPoint, radius: number, options: Partial<Konva.CircleConfig> = {}) => group.add(new Konva.Circle({
     x: x(center.x), y: y(center.y), radius: radius * scale, stroke, strokeWidth, ...options
@@ -82,7 +89,7 @@ const renderFullPitch = (width: number, height: number): Konva.Group => {
       : sampledArc(spot, CENTER_RADIUS, -arcAngle, arcAngle));
 
     const goalDepth = 2.2;
-    const goalX = right ? PITCH_LENGTH - goalDepth : 0;
+    const goalX = right ? PITCH_LENGTH : -goalDepth;
     rect(goalX, centerY - GOAL_WIDTH / 2, goalDepth, GOAL_WIDTH, { fill: 'rgba(226,232,240,.12)', dash: [3, 3] });
   };
 
@@ -96,22 +103,35 @@ const renderFullPitch = (width: number, height: number): Konva.Group => {
   line(sampledArc({ x: 0, y: PITCH_WIDTH }, CORNER_RADIUS, -Math.PI / 2, 0, 12));
   line(sampledArc({ x: PITCH_LENGTH, y: 0 }, CORNER_RADIUS, Math.PI / 2, Math.PI, 12));
   line(sampledArc({ x: PITCH_LENGTH, y: PITCH_WIDTH }, CORNER_RADIUS, Math.PI, Math.PI * 1.5, 12));
-  group.add(new Konva.Rect({ x: strokeWidth / 2, y: strokeWidth / 2, width: width - strokeWidth, height: height - strokeWidth, stroke, strokeWidth }));
+  group.add(new Konva.Rect({
+    x: x(0),
+    y: y(0),
+    width: metricWidth(PITCH_LENGTH),
+    height: metricHeight(PITCH_WIDTH),
+    stroke,
+    strokeWidth
+  }));
   return group;
 };
 
 const renderHalfPitch = (width: number, height: number): Konva.Group => {
   const group = grass(width, height, false);
-  const x = (meters: number) => meters / PITCH_WIDTH * width;
-  const y = (meters: number) => meters / HALF_LENGTH * height;
-  const scale = (width / PITCH_WIDTH + height / HALF_LENGTH) / 2;
+  const surfaceWidth = PITCH_WIDTH + PITCH_RUNOFF * 2;
+  const surfaceHeight = HALF_LENGTH + PITCH_RUNOFF * 2;
+  const scaleX = width / surfaceWidth;
+  const scaleY = height / surfaceHeight;
+  const x = (meters: number) => (meters + PITCH_RUNOFF) * scaleX;
+  const y = (meters: number) => (meters + PITCH_RUNOFF) * scaleY;
+  const metricWidth = (meters: number) => meters * scaleX;
+  const metricHeight = (meters: number) => meters * scaleY;
+  const scale = (scaleX + scaleY) / 2;
   const strokeWidth = Math.max(1.7, .1 * scale);
   const stroke = 'rgba(255,255,255,.94)';
   const line = (points: MetricPoint[], options: Partial<Konva.LineConfig> = {}) => group.add(new Konva.Line({
     points: points.flatMap(point => [x(point.x), y(point.y)]), stroke, strokeWidth, lineCap: 'round', lineJoin: 'round', ...options
   }));
   const rect = (left: number, top: number, metricWidth: number, metricHeight: number, options: Partial<Konva.RectConfig> = {}) => group.add(new Konva.Rect({
-    x: x(left), y: y(top), width: x(metricWidth), height: y(metricHeight), stroke, strokeWidth, ...options
+    x: x(left), y: y(top), width: metricWidth * scaleX, height: metricHeight * scaleY, stroke, strokeWidth, ...options
   }));
   const circle = (center: MetricPoint, radius: number, options: Partial<Konva.CircleConfig> = {}) => group.add(new Konva.Circle({
     x: x(center.x), y: y(center.y), radius: radius * scale, stroke, strokeWidth, ...options
@@ -126,18 +146,31 @@ const renderHalfPitch = (width: number, height: number): Konva.Group => {
   circle(spot, .16, { fill: stroke, strokeWidth: 0 });
   const arcAngle = Math.asin((PENALTY_AREA_DEPTH - PENALTY_SPOT) / CENTER_RADIUS);
   line(sampledArc(spot, CENTER_RADIUS, arcAngle, Math.PI - arcAngle));
-  rect(centerX - GOAL_WIDTH / 2, 0, GOAL_WIDTH, 2.2, { fill: 'rgba(226,232,240,.12)', dash: [3, 3] });
+  rect(centerX - GOAL_WIDTH / 2, -2.2, GOAL_WIDTH, 2.2, { fill: 'rgba(226,232,240,.12)', dash: [3, 3] });
 
   line([{ x: 0, y: HALF_LENGTH }, { x: PITCH_WIDTH, y: HALF_LENGTH }]);
   line(sampledArc({ x: centerX, y: HALF_LENGTH }, CENTER_RADIUS, Math.PI, Math.PI * 2));
   circle({ x: centerX, y: HALF_LENGTH }, .16, { fill: stroke, strokeWidth: 0 });
   line(sampledArc({ x: 0, y: 0 }, CORNER_RADIUS, 0, Math.PI / 2, 12));
   line(sampledArc({ x: PITCH_WIDTH, y: 0 }, CORNER_RADIUS, Math.PI / 2, Math.PI, 12));
-  group.add(new Konva.Rect({ x: strokeWidth / 2, y: strokeWidth / 2, width: width - strokeWidth, height: height - strokeWidth, stroke, strokeWidth }));
+  group.add(new Konva.Rect({
+    x: x(0),
+    y: y(0),
+    width: metricWidth(PITCH_WIDTH),
+    height: metricHeight(HALF_LENGTH),
+    stroke,
+    strokeWidth
+  }));
   return group;
 };
 
 export function registerFootballSurfaces(registry: Registry): void {
-  registry.registerSurface('football.halfpitch', { ratio: PITCH_WIDTH / HALF_LENGTH, render: renderHalfPitch });
-  registry.registerSurface('football.fullpitch', { ratio: PITCH_LENGTH / PITCH_WIDTH, render: renderFullPitch });
+  registry.registerSurface('football.halfpitch', {
+    ratio: (PITCH_WIDTH + PITCH_RUNOFF * 2) / (HALF_LENGTH + PITCH_RUNOFF * 2),
+    render: renderHalfPitch
+  });
+  registry.registerSurface('football.fullpitch', {
+    ratio: (PITCH_LENGTH + PITCH_RUNOFF * 2) / (PITCH_WIDTH + PITCH_RUNOFF * 2),
+    render: renderFullPitch
+  });
 }

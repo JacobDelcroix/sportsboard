@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { describe, expect, it } from 'vitest';
 import { CoreElements, Registry, registerBuiltins, type BoardDocument, type BoardElement, type RenderContext } from '../src/core/index.js';
 import { createCoreEditorTools, movementConversionPatch } from '../src/editor/generic-tools.js';
-import { shouldRefreshColorPalette } from '../src/editor/change.js';
+import { shouldRefreshColorPalette, steppedRotation } from '../src/editor/change.js';
 import { resolveEditorMessages } from '../src/editor/i18n.js';
 
 const context: RenderContext = {
@@ -69,5 +69,12 @@ describe('generic editor tools', () => {
     expect(shouldRefreshColorPalette({ document, kind: 'meta' })).toBe(false);
     expect(shouldRefreshColorPalette({ document, kind: 'content' })).toBe(true);
     expect(shouldRefreshColorPalette({ document, kind: 'surface' })).toBe(true);
+  });
+
+  it('rotates keyboard selections in ten-degree steps with wrapping', () => {
+    expect(steppedRotation(undefined, 1)).toBe(10);
+    expect(steppedRotation(undefined, -1)).toBe(350);
+    expect(steppedRotation(355, 1)).toBe(5);
+    expect(steppedRotation(5, -1)).toBe(355);
   });
 });

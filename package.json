@@ -1,6 +1,6 @@
 {
   "name": "@jacobdelcroix/sportsboard",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Modular sports tactic board viewer and visual editor built with TypeScript and Konva.",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,11 @@
     "board",
     "editor",
     "viewer",
-    "konva"
+    "konva",
+    "basketball",
+    "football",
+    "web-components",
+    "canvas"
   ],
   "engines": {
     "node": ">=20"
@@ -120,7 +124,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "konva": "^10.3.1"
+    "konva": "^10.3.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
