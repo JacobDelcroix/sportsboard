@@ -21,6 +21,7 @@
     "konva",
     "basketball",
     "football",
+    "volleyball",
     "web-components",
     "canvas"
   ],
@@ -89,6 +90,18 @@
       "types": "./dist/sports/football/editor-entry.d.ts",
       "import": "./dist/sports/football/editor-entry.js"
     },
+    "./volleyball": {
+      "types": "./dist/sports/volleyball/index.d.ts",
+      "import": "./dist/sports/volleyball/index.js"
+    },
+    "./volleyball/viewer": {
+      "types": "./dist/sports/volleyball/viewer-entry.d.ts",
+      "import": "./dist/sports/volleyball/viewer-entry.js"
+    },
+    "./volleyball/editor": {
+      "types": "./dist/sports/volleyball/editor-entry.d.ts",
+      "import": "./dist/sports/volleyball/editor-entry.js"
+    },
     "./viewer/locales/en.json": "./dist/viewer/locales/en.json",
     "./viewer/locales/fr.json": "./dist/viewer/locales/fr.json",
     "./editor/locales/en.json": "./dist/editor/locales/en.json",
@@ -96,7 +109,9 @@
     "./basketball/locales/en.json": "./dist/sports/basketball/locales/en.json",
     "./basketball/locales/fr.json": "./dist/sports/basketball/locales/fr.json",
     "./football/locales/en.json": "./dist/sports/football/locales/en.json",
-    "./football/locales/fr.json": "./dist/sports/football/locales/fr.json"
+    "./football/locales/fr.json": "./dist/sports/football/locales/fr.json",
+    "./volleyball/locales/en.json": "./dist/sports/volleyball/locales/en.json",
+    "./volleyball/locales/fr.json": "./dist/sports/volleyball/locales/fr.json"
   },
   "files": [
     "dist",

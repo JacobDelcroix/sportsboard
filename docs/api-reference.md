@@ -32,7 +32,7 @@ Focused imports and imperative integrations are covered in [Alternative integrat
 
 | Attribute | Values | Purpose |
 | --- | --- | --- |
-| `sport` | `basketball`, `football` | Selects the single sport owned by this instance |
+| `sport` | `basketball`, `football`, `volleyball` | Selects the single sport owned by this instance |
 | `locale` | `en`, `fr` | Selects built-in interface and sport wording |
 | `surface` | surface ID | Selects the empty document's initial surface |
 | `show-save` | boolean attribute | Shows or hides the built-in Save button |
@@ -84,7 +84,7 @@ Markup attributes take precedence over matching property options. The element re
 
 | Attribute | Values | Purpose |
 | --- | --- | --- |
-| `sport` | `basketball`, `football` | Selects the document registry |
+| `sport` | `basketball`, `football`, `volleyball` | Selects the document registry |
 | `locale` | `en`, `fr` | Selects navigation wording |
 | `surface` | surface ID | Selects the empty document's initial surface |
 | `controls` | boolean attribute | Shows zoom and reset controls |
@@ -280,6 +280,8 @@ The package exports English and French JSON files:
 @jacobdelcroix/sportsboard/basketball/locales/fr.json
 @jacobdelcroix/sportsboard/football/locales/en.json
 @jacobdelcroix/sportsboard/football/locales/fr.json
+@jacobdelcroix/sportsboard/volleyball/locales/en.json
+@jacobdelcroix/sportsboard/volleyball/locales/fr.json
 ```
 
 Copy the relevant files into the application, keep their keys, customize their values, and pass the imported objects through `messages` and `sportMessages`.

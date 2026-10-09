@@ -1,0 +1,13 @@
+{
+  "sport": "Volleyball", "halfCourt": "Half court", "fullCourt": "Full court",
+  "attackers": "Attackers", "defenders": "Defenders", "equipment": "Equipment", "movements": "Movements",
+  "attackerDescription": "Attacker number {number}", "defenderDescription": "Defender number {number}",
+  "ball": "Ball", "ballDescription": "Volleyball that snaps to a selected player or coach",
+  "coach": "Coach", "coachDescription": "Coach identified by a C",
+  "cone": "Cone", "coneDescription": "Training cone",
+  "run": "Run", "runDescription": "Free or element-attached run",
+  "pass": "Pass", "passDescription": "Free or element-attached pass",
+  "set": "Set", "setDescription": "Free or element-attached set",
+  "spike": "Spike", "spikeDescription": "Free or element-attached spike",
+  "block": "Block", "blockDescription": "Free or element-attached block"
+}

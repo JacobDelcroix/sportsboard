@@ -35,7 +35,8 @@ src/
 ├── element/              Declarative editor and viewer custom elements
 └── sports/
     ├── basketball/       Basketball surfaces, elements, and tools
-    └── football/         Football surfaces, elements, and tools
+    ├── football/         Football surfaces, elements, and tools
+    └── volleyball/       Volleyball surfaces, elements, and tools
 ```
 
 The repository publishes one npm package. Internal modules do not have their own `package.json` or `dist`. `npm run build` generates one ignored root `dist` directory.
@@ -60,7 +61,7 @@ npm run build
 npm run playground:build
 ```
 
-When changing interactions, test both Basketball and Football, half and full surfaces, editor and viewer modes, English and French, JSON loading, and image generation.
+When changing interactions, test every built-in sport (Basketball, Football, and Volleyball), half and full surfaces, editor and viewer modes, English and French, JSON loading, and image generation.
 
 ## Add a language
 
@@ -72,7 +73,8 @@ To propose another language:
    - `src/viewer/locales`;
    - `src/editor/locales`;
    - `src/sports/basketball/locales`;
-   - `src/sports/football/locales`.
+   - `src/sports/football/locales`;
+   - `src/sports/volleyball/locales`.
 2. Keep exactly the same keys as the English files and translate values only.
 3. Register the locale in the corresponding `i18n.ts` catalogs and extend `SportsBoardLocale`.
 4. Add the locale files to the public `exports` in `package.json`.
@@ -80,7 +82,7 @@ To propose another language:
 6. Add tests for generic controls, sport labels, fallback behavior, and application overrides.
 7. Update the README and API reference with the new locale code.
 
-Run `npm run check` and test both sports before opening the pull request. If a translation needs a different sentence structure, keep placeholders such as `{label}` and `{count}` intact.
+Run `npm run check` and test every sport before opening the pull request. If a translation needs a different sentence structure, keep placeholders such as `{label}` and `{count}` intact.
 
 ## Propose a pull request
 

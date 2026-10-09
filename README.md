@@ -6,7 +6,7 @@
 
 SportsBoard adds a complete sports tactic editor or a read-only board to a web page with one JavaScript import and one HTML element. Your application receives a portable JSON document and can also export PNG, JPEG, or WebP images.
 
-Basketball and football are included. Each sport provides half and full surfaces with usable space outside the boundary lines, its own players and ball, and suitable movement tools.
+Basketball, football, and volleyball are included. Each sport provides half and full surfaces with usable space outside the boundary lines, its own players and ball, and suitable movement tools.
 
 ## Why SportsBoard
 
@@ -14,7 +14,7 @@ Basketball and football are included. Each sport provides half and full surfaces
 - One declarative custom element for the common integration; focused JavaScript APIs remain available for advanced applications.
 - Responsive mouse, keyboard, touch, tablet, and mobile interactions.
 - Portable normalized coordinates, validated references, deterministic layers, undo/redo, notes, and image export.
-- Basketball and football included, with extensible sports, elements, surfaces, colors, and translations.
+- Basketball, football, and volleyball included, with extensible sports, elements, surfaces, colors, and translations.
 - No framework or Tailwind runtime requirement. The package uses native web components and Konva.
 
 <p align="center">
@@ -57,6 +57,7 @@ Use the exact value from the `sport` column on either custom element.
 | --- | --- | --- | --- |
 | Basketball | `basketball` | `basketball.halfcourt` | `basketball.fullcourt` |
 | Football | `football` | `football.halfpitch` | `football.fullpitch` |
+| Volleyball | `volleyball` | `volleyball.halfcourt` | `volleyball.fullcourt` |
 
 ```html
 <sports-board-editor sport="basketball"></sports-board-editor>
@@ -388,7 +389,7 @@ See [Laravel, Livewire, and Alpine.js integration](docs/laravel-livewire-alpine.
 
 ## Languages and custom wording
 
-SportsBoard is multilingual. English (`en`) and French (`fr`) are included for the viewer, editor, basketball, and football.
+SportsBoard is multilingual. English (`en`) and French (`fr`) are included for the viewer, editor, basketball, football, and volleyball.
 
 ```html
 <sports-board-editor sport="basketball" locale="fr"></sports-board-editor>
@@ -401,6 +402,7 @@ To customize wording, copy the relevant catalog from the package into your appli
 @jacobdelcroix/sportsboard/viewer/locales/fr.json
 @jacobdelcroix/sportsboard/basketball/locales/fr.json
 @jacobdelcroix/sportsboard/football/locales/fr.json
+@jacobdelcroix/sportsboard/volleyball/locales/fr.json
 ```
 
 Keep the keys and change the values, then pass the copied objects through the element's `options` property:
@@ -426,7 +428,7 @@ See [Contributing](CONTRIBUTING.md#add-a-language) to propose another built-in l
 - [Saving diagrams and generating thumbnails](docs/saving-and-thumbnails.md)
 - [Laravel, Livewire, and Alpine.js integration](docs/laravel-livewire-alpine.md)
 - [API reference](docs/api-reference.md)
-- [Basketball and football](docs/sports.md)
+- [Basketball, football, and volleyball](docs/sports.md)
 - [Extensions and custom sports](docs/extending.md)
 - [Modes and permissions](docs/modes-and-permissions.md)
 - [Contributing](CONTRIBUTING.md)

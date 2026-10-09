@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Registry } from './registry.js';
-import type { BoardElement, Endpoint, RenderContext } from './types.js';
+import type { BoardElement, ElementInput, Endpoint, RenderContext } from './types.js';
 
 const routePoints = (element: BoardElement, context: RenderContext): number[] => {
   const fromEndpoint = element.from ?? { x: element.x ?? 0, y: element.y ?? 0 };
@@ -211,9 +211,9 @@ const withMovementLabel = (
   return group;
 };
 
-interface ElementBox { group: Konva.Group; width: number; height: number }
+export interface ElementBox { group: Konva.Group; width: number; height: number }
 
-const elementBox = (
+export const elementBox = (
   element: BoardElement,
   context: RenderContext,
   defaultWidth: number,
@@ -238,7 +238,7 @@ const elementBox = (
   return { group, width, height };
 };
 
-const elementColor = (element: BoardElement, fallback: string): string => String(element.style?.color ?? fallback);
+export const elementColor = (element: BoardElement, fallback: string): string => String(element.style?.color ?? fallback);
 
 const zone = (element: BoardElement, context: RenderContext): Konva.Group => {
   const { group, width, height } = elementBox(element, context, .24, .14, null, false);
@@ -435,3 +435,11 @@ export function registerBuiltins(registry = new Registry()): Registry {
 }
 
 export function isElementEndpoint(endpoint: Endpoint): endpoint is { element: string } { return 'element' in endpoint; }
+
+/** Anything a sport helper accepts where an element endpoint is expected. */
+export type EndpointInput = BoardElement | string | Endpoint;
+
+export const toEndpoint = (value: EndpointInput): Endpoint => typeof value === 'string' ? { element: value } : 'id' in value ? { element: value.id } : value;
+
+/** Builds a core.connector element input for a named movement between two endpoints. */
+export const connector = (from: EndpointInput, to: EndpointInput, style: Record<string, unknown>, movement: string): ElementInput => ({ type: 'core.connector', from: toEndpoint(from), to: toEndpoint(to), style, data: { movement } });

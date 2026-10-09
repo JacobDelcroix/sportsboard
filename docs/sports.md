@@ -1,4 +1,4 @@
-# Basketball and football
+# Basketball, football, and volleyball
 
 One editor or viewer element owns one sport. Sport selection belongs to the surrounding application: render a new element when the user changes sport.
 
@@ -103,6 +103,49 @@ import { Football } from '@jacobdelcroix/sportsboard/football/viewer';
 
 board.add(Football.run('player-7', { x: 0.18, y: 0.25 }));
 board.add(Football.pass('player-9', 'player-10'));
+```
+
+## Volleyball
+
+```html
+<sports-board-editor sport="volleyball" locale="en"></sports-board-editor>
+<sports-board-viewer sport="volleyball" locale="en"></sports-board-viewer>
+```
+
+Available surfaces:
+
+- `volleyball.halfcourt`;
+- `volleyball.fullcourt`.
+
+The playable areas use the proportions and main markings of an 18 × 9 metre court. The half court keeps one 9 × 9 metre side with the net on its boundary; both surfaces add three metres of usable floor outside every boundary line. The net, its posts, and the antennae are rendered in this outer area so players and routes stay inside the playable surface.
+
+Available editor elements:
+
+- attackers numbered 1–6;
+- defenders numbered 1–6;
+- volleyball;
+- coach;
+- cone.
+
+Available movements:
+
+- run;
+- pass;
+- set;
+- spike;
+- block.
+
+The volleyball can snap to an attacker, defender, or coach and follows that element. Movements can also attach to players, coaches, or cones, never to the ball.
+
+Selecting an attacker, defender, or coach before clicking the Ball tool attaches the new ball immediately. Dragging the tool onto the court still creates a freely positioned ball.
+
+Programmatic helpers are exported in the same way:
+
+```js
+import { Volleyball } from '@jacobdelcroix/sportsboard/volleyball/viewer';
+
+board.add(Volleyball.pass('player-4', 'player-1'));
+board.add(Volleyball.spike('player-1', { x: .55, y: .12 }));
 ```
 
 ## Localized sport labels

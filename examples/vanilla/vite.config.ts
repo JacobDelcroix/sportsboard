@@ -12,6 +12,8 @@ export default defineConfig({
       '@jacobdelcroix/sportsboard/basketball/editor': source('sports/basketball/editor-entry.ts'),
       '@jacobdelcroix/sportsboard/football/viewer': source('sports/football/viewer-entry.ts'),
       '@jacobdelcroix/sportsboard/football/editor': source('sports/football/editor-entry.ts'),
+      '@jacobdelcroix/sportsboard/volleyball/viewer': source('sports/volleyball/viewer-entry.ts'),
+      '@jacobdelcroix/sportsboard/volleyball/editor': source('sports/volleyball/editor-entry.ts'),
       '@jacobdelcroix/sportsboard/core': source('core/index.ts'),
       '@jacobdelcroix/sportsboard/viewer': source('viewer/index.ts'),
       '@jacobdelcroix/sportsboard/editor': source('editor/index.ts'),

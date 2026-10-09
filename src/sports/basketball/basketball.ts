@@ -1,8 +1,4 @@
-import type { BoardElement, ElementInput, Endpoint } from '../../core/index.js';
-
-type EndpointInput = BoardElement | string | Endpoint;
-const endpoint = (value: EndpointInput): Endpoint => typeof value === 'string' ? { element: value } : 'id' in value ? { element: value.id } : value;
-const connector = (from: EndpointInput, to: EndpointInput, style: Record<string, unknown>, movement: string): ElementInput => ({ type: 'core.connector', from: endpoint(from), to: endpoint(to), style, data: { movement } });
+import { connector, type EndpointInput, type ElementInput } from '../../core/index.js';
 
 export const Basketball = {
   surfaces: { halfCourt: 'basketball.halfcourt', fullCourt: 'basketball.fullcourt' },

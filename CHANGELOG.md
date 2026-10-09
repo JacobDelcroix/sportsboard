@@ -4,6 +4,10 @@ All notable changes to SportsBoard are documented in this file. The project foll
 
 ## [Unreleased]
 
+### Added
+
+- Volleyball is now a built-in sport with half-court and full-court surfaces, six numbered attackers and defenders per side, a coach, a snapping volleyball, a training cone, and run, pass, set, spike, and block movements.
+
 ## [1.1.1] - 2026-09-03
 
 ### Changed

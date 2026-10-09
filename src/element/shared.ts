@@ -29,7 +29,7 @@ export function resolveIdentity(element: HTMLElement, options: SportsBoardElemen
 } {
   const sport = element.getAttribute('sport') ?? options.sport ?? 'basketball';
   const locale = element.getAttribute('locale') ?? options.locale ?? 'en';
-  if (sport !== 'basketball' && sport !== 'football') throw new Error(`Unknown SportsBoard sport '${sport}'`);
+  if (sport !== 'basketball' && sport !== 'football' && sport !== 'volleyball') throw new Error(`Unknown SportsBoard sport '${sport}'`);
   if (locale !== 'en' && locale !== 'fr') throw new Error(`Unknown SportsBoard locale '${locale}'`);
   return { sport, locale, surface: element.getAttribute('surface') ?? options.surface };
 }

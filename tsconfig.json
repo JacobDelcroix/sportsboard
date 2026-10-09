@@ -18,7 +18,10 @@
       "@jacobdelcroix/sportsboard/basketball/editor": ["./src/sports/basketball/editor-entry.ts"],
       "@jacobdelcroix/sportsboard/football": ["./src/sports/football/index.ts"],
       "@jacobdelcroix/sportsboard/football/viewer": ["./src/sports/football/viewer-entry.ts"],
-      "@jacobdelcroix/sportsboard/football/editor": ["./src/sports/football/editor-entry.ts"]
+      "@jacobdelcroix/sportsboard/football/editor": ["./src/sports/football/editor-entry.ts"],
+      "@jacobdelcroix/sportsboard/volleyball": ["./src/sports/volleyball/index.ts"],
+      "@jacobdelcroix/sportsboard/volleyball/viewer": ["./src/sports/volleyball/viewer-entry.ts"],
+      "@jacobdelcroix/sportsboard/volleyball/editor": ["./src/sports/volleyball/editor-entry.ts"]
     },
     "strict": true,
     "skipLibCheck": true,

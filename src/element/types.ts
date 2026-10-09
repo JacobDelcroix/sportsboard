@@ -2,10 +2,11 @@ import type { BoardDocument, BoardImageOptions } from '../core/index.js';
 import type { EditorColorOption, EditorMessages } from '../editor/types.js';
 import type { BasketballMessages } from '../sports/basketball/i18n.js';
 import type { FootballMessages } from '../sports/football/i18n.js';
+import type { VolleyballMessages } from '../sports/volleyball/i18n.js';
 import type { SportsBoardLocale, ViewerMessages } from '../viewer/types.js';
 
-export type BuiltInSport = 'basketball' | 'football';
-export type SportsBoardSportMessages = Partial<BasketballMessages> | Partial<FootballMessages>;
+export type BuiltInSport = 'basketball' | 'football' | 'volleyball';
+export type SportsBoardSportMessages = Partial<BasketballMessages> | Partial<FootballMessages> | Partial<VolleyballMessages>;
 
 export interface SportsBoardElementOptions {
   sport?: BuiltInSport;

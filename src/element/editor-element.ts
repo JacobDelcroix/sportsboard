@@ -1,10 +1,7 @@
 import type { BoardDocument, BoardImageOptions } from '../core/index.js';
 import { SportsBoardEditor } from '../editor/index.js';
-import { createBasketballEditor } from '../sports/basketball/editor.js';
-import type { BasketballMessages } from '../sports/basketball/i18n.js';
-import { createFootballEditor } from '../sports/football/editor.js';
-import type { FootballMessages } from '../sports/football/i18n.js';
 import { mountElementStyles } from './styles.js';
+import { editorFactories } from './sports.js';
 import {
   booleanAttribute,
   clone,
@@ -121,9 +118,7 @@ export class SportsBoardEditorElement extends HTMLElementBase {
     const options = this.resolveOptions();
     const identity = resolveIdentity(this, options);
     const data = resolveElementData(this, this.documentData, options.data);
-    const sport = identity.sport === 'football'
-      ? createFootballEditor(identity.locale, options.sportMessages as Partial<FootballMessages>)
-      : createBasketballEditor(identity.locale, options.sportMessages as Partial<BasketballMessages>);
+    const sport = editorFactories[identity.sport](identity.locale, options.sportMessages);
 
     this.instance?.destroy();
     this.instance = new SportsBoardEditor(this, {

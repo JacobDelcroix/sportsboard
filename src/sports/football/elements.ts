@@ -1,24 +1,5 @@
 import Konva from 'konva';
-import type { BoardElement, Registry, RenderContext } from '../../core/index.js';
-
-interface ElementBox { group: Konva.Group; width: number; height: number }
-
-const elementBox = (element: BoardElement, context: RenderContext, defaultWidth: number, defaultHeight: number): ElementBox => {
-  const rawWidth = (element.width ?? defaultWidth) * context.width;
-  const rawHeight = (element.height ?? defaultHeight) * context.height;
-  const size = Math.sqrt(Math.max(1, rawWidth * rawHeight));
-  const group = new Konva.Group({
-    x: (element.x ?? 0) * context.width,
-    y: (element.y ?? 0) * context.height,
-    width: size,
-    height: size,
-    offsetX: size / 2,
-    offsetY: size / 2,
-    rotation: element.rotation ?? 0
-  });
-  group.add(new Konva.Rect({ width: size, height: size, fill: 'rgba(0,0,0,.001)' }));
-  return { group, width: size, height: size };
-};
+import { elementBox, type BoardElement, type Registry, type RenderContext } from '../../core/index.js';
 
 const player = (element: BoardElement, context: RenderContext): Konva.Group => {
   const { group, width, height } = elementBox(element, context, .064, .064);

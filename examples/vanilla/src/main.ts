@@ -1,6 +1,7 @@
 import type { BoardDocument, BoardMode } from '@jacobdelcroix/sportsboard/core';
 import { Basketball, createBasketballViewer } from '@jacobdelcroix/sportsboard/basketball/viewer';
 import { Football, createFootballViewer } from '@jacobdelcroix/sportsboard/football/viewer';
+import { Volleyball, createVolleyballViewer } from '@jacobdelcroix/sportsboard/volleyball/viewer';
 import '@jacobdelcroix/sportsboard/element';
 import { SportsBoardEditorElement, SportsBoardViewerElement, type BuiltInSport } from '@jacobdelcroix/sportsboard/element';
 import { renderSportsBoardThumbnail, type SportsBoardLocale } from '@jacobdelcroix/sportsboard/viewer';
@@ -40,13 +41,32 @@ const footballDocument: BoardDocument = {
   ]
 };
 
+const volleyballDocument: BoardDocument = {
+  schema: 'sportsboard',
+  version: 1,
+  meta: { notes: 'Serve reception: pass to the setter, then attack outside.' },
+  surface: { type: Volleyball.surfaces.halfCourt },
+  elements: [
+    { id: 'player-1', type: Volleyball.elements.attacker, x: .74, y: .3, data: { number: 1 } },
+    { id: 'player-2', type: Volleyball.elements.attacker, x: .52, y: .16, data: { number: 2 } },
+    { id: 'player-3', type: Volleyball.elements.attacker, x: .3, y: .2, data: { number: 3 } },
+    { id: 'player-4', type: Volleyball.elements.attacker, x: .55, y: .6, data: { number: 4 } },
+    { id: 'defender-1', type: Volleyball.elements.defender, x: .82, y: .14, data: { number: 1 } },
+    { id: 'ball-1', type: Volleyball.elements.ball, x: .78, y: .27, attachment: { element: 'player-1', anchor: { x: .94, y: .28 } } },
+    { id: 'pass-1', ...Volleyball.pass('player-4', 'player-1') },
+    { id: 'set-1', ...Volleyball.set('player-1', { x: .55, y: .18 }) },
+    { id: 'run-1', ...Volleyball.run('player-2', { x: .48, y: .1 }) }
+  ]
+};
+
 const urlParameters = new URLSearchParams(window.location.search);
 let locale: SportsBoardLocale = urlParameters.get('lang') === 'fr' ? 'fr' : 'en';
 const createDemoSports = () => [
   { id: 'basketball' as const, viewer: createBasketballViewer(locale) },
-  { id: 'football' as const, viewer: createFootballViewer(locale) }
+  { id: 'football' as const, viewer: createFootballViewer(locale) },
+  { id: 'volleyball' as const, viewer: createVolleyballViewer(locale) }
 ];
-const initialDocumentFor = (sportId: BuiltInSport): BoardDocument => sportId === 'football' ? footballDocument : basketballDocument;
+const initialDocumentFor = (sportId: BuiltInSport): BoardDocument => sportId === 'football' ? footballDocument : sportId === 'volleyball' ? volleyballDocument : basketballDocument;
 let demoSports = createDemoSports();
 const languageSelect = document.querySelector<HTMLSelectElement>('#demo-language')!;
 const sportSelect = document.querySelector<HTMLSelectElement>('#demo-sport')!;
